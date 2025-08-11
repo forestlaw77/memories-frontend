@@ -1,0 +1,35 @@
+# ========================
+# 🔐 Authentication Config
+# ========================
+
+# URL used by NextAuth for callback and session handling
+NEXTAUTH_URL=http://localhost:8080
+
+# Secret used to encrypt session tokens (generate with: openssl rand -base64 32)
+NEXTAUTH_SECRET=your_random_secret_here
+
+# Google OAuth credentials (required for login)
+GOOGLE_CLIENT_ID=your_google_client_id_here
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+
+# ========================
+# 🔗 External API Keys
+# ========================
+
+# Rakuten Books API (optional, for book search)
+RAKUTEN_APP_ID=your_rakuten_app_id_here
+
+# Google Books API (optional, for metadata enrichment)
+GOOGLE_BOOKS_API_KEY=your_google_books_api_key_here
+
+
+# ========================
+# 🔧 Backend Configuration
+# ========================
+
+# Internal API URL used by server-side code (e.g. NextAuth)
+BACKEND_API_URL=http://memories-storage:4001
+
+# Public API URL exposed to the browser (used in fetch requests)
+NEXT_PUBLIC_BACKEND_API_URL=http://localhost:4001

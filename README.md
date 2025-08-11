@@ -93,10 +93,31 @@ networks:
     driver: bridge
 ```
 
-> Make sure your .env files are configured correctly in each project.  
-> For example, NEXT_PUBLIC_BACKEND_API_URL should point to the storage server.
+4. Configure environment variables
 
-4. Start the development environment
+Each project requires a `.env.local` the for runtime configuration.
+
+You can start by copying the provided `dot_env.example` files:
+
+```bash
+# Copy template files to create your local environment configs
+cp memories-frontend/dot_env.example memories-frontend/.env.local
+cp memories-storage/dot_env.example memories-storage/.env.local
+```
+
+> 🛡️ Note: We use dot_env.example instead of .env.example to avoid accidental inclusion in version control.
+> Make sure .env.local is listed in .gitignore and never committed.
+
+Then fill in the required values:
+
+- **Frontend** (`memories-frontend/.env.local`)  
+  Includes API keys, OAuth credentials and backend URLs.
+- **Storage** (`memories-storage/.env.local`)  
+  Includes storage path, server port, and OAuth credentials for token verification.
+
+> 🔐 Make sure both projects use the same `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to ensure consistent authentication.
+
+5. Start the development environment
 
 ```bash
    docker compose up
@@ -107,9 +128,10 @@ The storage server will be available at http://localhost:4001
 
 ✅ Notes
 
-- You can mount sample data into memories-storage/local_storage to test resource loading.
-- If you're using VS Code with Remote Containers, the .vscode-server volume ensures persistent extensions.
+- You can mount sample data into `memories-storage/local_storage` to test resource loading.
+- If you're using VS Code with Remote Containers, the `.vscode-server` volume ensures persistent extensions.
 - UID/GID mapping ensures file permissions match your host system.
+- Environment variables are loaded from `.env.local` in each project. See `.env.example` for reference.
 
 ## 🧰 Tech Stack
 
@@ -123,7 +145,6 @@ The storage server will be available at http://localhost:4001
 | Data Fetching    | TanStack Query              | Async caching, background updates            |
 | Styling          | CSS Modules + Chakra tokens | Scoped styles and design consistency         |
 | Icons            | React Icons                 | Visual cues and UI clarity                   |
-| Build Tooling    | Vite                        | Fast dev server and optimized builds         |
 
 ## 🧪 Development Philosophy
 
@@ -183,9 +204,8 @@ This software is dual-licensed:
 - **Non-commercial use**: Licensed under the MIT License (with Non-Commercial restriction) — see [LICENSE-NC.txt](LICENSE-NC.txt)
 - **Commercial use**: Requires a separate commercial license — see [LICENSE-COMMERCIAL.txt](LICENSE-COMMERCIAL.txt) and contact the author.
 
-You may choose the license that best fits your use case.
-🔒 A commercial license is an important way to help us keep developing and to ensure you can use the software with confidence.
-
+You may choose the license that best fits your use case.  
+🔒 A commercial license is an important way to help us keep developing and to ensure you can use the software with confidence.  
 📧 Contact: forestlaw.me+github@gmail.com
 
 ### ライセンス（日本語）
@@ -195,12 +215,12 @@ You may choose the license that best fits your use case.
 - **非商用利用**: 非商用 MIT ライセンス（[LICENSE-NC.txt](LICENSE-NC.txt)）の条件で利用可能
 - **商用利用**: 別途商用ライセンスが必要（[LICENSE-COMMERCIAL.txt](LICENSE-COMMERCIAL.txt) を参照し、作者に連絡）
 
-用途に応じて、適切なライセンスを選択してください。
-🔒 商用ライセンスは、みなさまに安心して使っていただくため、そして開発を続けるための大切な仕組みです。
+用途に応じて、適切なライセンスを選択してください。  
+🔒 商用ライセンスは、みなさまに安心して使っていただくため、そして開発を続けるための大切な仕組みです。  
 📧 Contact: forestlaw.me+github@gmail.com
 
 ## 🧑‍💻 Author
 
 Tsutomu Funada
-Frontend engineer & Backend engineer & UX designer
+Frontend engineer & Backend engineer & UX designer  
 📧 Contact: forestlaw.me+github@gmail.com
