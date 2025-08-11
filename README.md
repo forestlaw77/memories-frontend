@@ -141,11 +141,9 @@ src/
 ├── components/ # Reusable UI elements
 ├── features/ # Domain-specific modules (map, slideshow, settings)
 ├── hooks/ # Custom logic and state accessors
-├── stores/ # Zustand slices and selectors
 ├── utils/ # Shared helpers and constants
 ├── assets/ # Icons, images, and static files
-├── App.tsx # Root component
-└── main.tsx # Entry point
+└── page.tsx # Root component
 ```
 
 ## ✅ Next Steps
@@ -176,6 +174,9 @@ Contributions are welcome! Here's how to get started:
   Please follow the Code of Conduct and check the Contribution Guidelines before submitting.
 
 ## 📄 License
+
+> Note: This project uses a custom license based on MIT.  
+> SPDX identifier: `LicenseRef-Tsutomu-MIT-NC`
 
 This software is dual-licensed:
 
