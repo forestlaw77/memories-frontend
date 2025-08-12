@@ -5,6 +5,7 @@
 // You may not use this software for commercial purposes under the MIT License.
 
 import { MAX_AGE } from "@/config/settings";
+import { env } from "@/libs/config/env.server";
 import logger from "@/libs/logger";
 import NextAuth, { NextAuthOptions, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
@@ -15,8 +16,8 @@ const MILLISECONDS_PER_SECOND = 1000;
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: env.GOOGLE_CLIENT_ID!,
+      clientSecret: env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
           scope: "openid email profile",
@@ -26,7 +27,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
     maxAge: MAX_AGE,
@@ -80,7 +81,7 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
-      const backendApiUrl = process.env.BACKEND_API_URL;
+      const backendApiUrl = env.BACKEND_API_URL;
       if (!backendApiUrl) {
         logger.error("BACKEND_API_URL environment variable is not set.");
         return false; // またはエラーをスロー
@@ -138,8 +139,8 @@ async function refreshAccessToken(token: JWT) {
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: new URLSearchParams({
-        client_id: process.env.GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+        client_id: env.GOOGLE_CLIENT_ID!,
+        client_secret: env.GOOGLE_CLIENT_SECRET!,
         refresh_token: token.refreshToken as string,
         grant_type: "refresh_token",
       }),

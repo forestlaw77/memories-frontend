@@ -63,8 +63,6 @@ services:
       - ./memories-frontend/.vscode-server:/root/.vscode-server
     ports:
       - "8080:8080"
-    environment:
-      - NEXT_PUBLIC_BACKEND_API_URL=http://localhost:5000
     networks:
       - memories-network
     command: pnpm dev
@@ -132,6 +130,36 @@ The storage server will be available at http://localhost:4001
 - If you're using VS Code with Remote Containers, the `.vscode-server` volume ensures persistent extensions.
 - UID/GID mapping ensures file permissions match your host system.
 - Environment variables are loaded from `.env.local` in each project. See `.env.example` for reference.
+
+## 🔐 Environment Variable Security
+
+Do not include .env.local or other .env files in your Docker images.
+These files may contain sensitive credentials (e.g. OAuth secrets, API keys).
+If bundled into the image, they can be extracted by anyone with access to the image.
+
+✅ Recommended Practices
+
+- Add .env\* to .dockerignore to prevent accidental inclusion:
+
+```Txt
+.env
+.env.local
+.env.production
+```
+
+- Inject secrets at runtime using docker run -e or --env-file:
+
+```Bash
+docker run -e NEXTAUTH_SECRET=your-secret -e BACKEND_API_URL=https://api.example.com your-image
+```
+
+- For production deployments, use a secrets manager (e.g. AWS Secrets Manager, HashiCorp Vault)
+
+💡 Why this matters
+
+> Docker images are portable and often shared.
+> Including secrets in the image makes them accessible to anyone who can pull or inspect it.
+> Keeping secrets out of the image ensures your credentials remain secure.
 
 ## 🧰 Tech Stack
 

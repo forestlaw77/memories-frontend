@@ -4,8 +4,9 @@
 //   - Commercial use requires a separate commercial license (contact author)
 // You may not use this software for commercial purposes under the MIT License.
 
-import { STORAGE_API_URL } from "@/config/settings";
+//import { STORAGE_API_URL } from "@/config/settings";
 import { ResourceAdapter } from "@/libs/adapters/ResourceAdapter";
+import { clientEnv } from "@/libs/config/env.client";
 import {
   BaseContentMeta,
   BaseDetailMeta,
@@ -113,7 +114,7 @@ export class ResourceFetcher<
     resourceCount: number;
     contentCount: number;
   }> {
-    const url = `${STORAGE_API_URL}/${this.resourceType}/summary`;
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/summary`;
 
     try {
       const response = await handleApiResponse(
@@ -136,7 +137,7 @@ export class ResourceFetcher<
   }
 
   async getResourceIds(): Promise<{ ids: string[] }> {
-    const url = `${STORAGE_API_URL}/${this.resourceType}/ids`;
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/ids`;
 
     try {
       const response = await handleApiResponse(
@@ -171,9 +172,9 @@ export class ResourceFetcher<
 
     const queryString = params.toString();
 
-    const url = `${STORAGE_API_URL}/${this.resourceType}/${
-      queryString ? `?${queryString}` : ""
-    }`;
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${
+      this.resourceType
+    }/${queryString ? `?${queryString}` : ""}`;
 
     try {
       const response = await handleApiResponse(
@@ -214,7 +215,7 @@ export class ResourceFetcher<
   async getResource(
     resourceId: string
   ): Promise<ResourceMeta<TContentMeta, TDetailMeta> | null> {
-    const url = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}`;
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}`;
     try {
       const response = await handleApiResponse(
         fetch(url, {
@@ -245,7 +246,7 @@ export class ResourceFetcher<
   }
 
   async deleteResource(resourceId: string) {
-    const url = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}`;
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}`;
     try {
       const response = await handleApiResponse(
         fetch(url, {
@@ -293,9 +294,9 @@ export class ResourceFetcher<
       : `${resourceId}/contents/${contentId}`;
 
     const builtQuery = buildQuery(query);
-    const url = `${STORAGE_API_URL}/${this.resourceType}/${path}${
-      builtQuery ? `?${builtQuery}` : ""
-    }`;
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${
+      this.resourceType
+    }/${path}${builtQuery ? `?${builtQuery}` : ""}`;
 
     try {
       const response = await handleApiResponse(
@@ -340,7 +341,7 @@ export class ResourceFetcher<
   }): Promise<Blob | null> {
     const query = buildQuery({ binary: true, size: size, fit: "contain" });
 
-    const url = `${STORAGE_API_URL}/${
+    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${
       this.resourceType
     }/${resourceId}/thumbnail${query ? `?${query}` : ""}`;
 
@@ -373,7 +374,7 @@ export class ResourceFetcher<
   }
 
   async addResource(formData: FormData): Promise<AddResourceSuccessResponse> {
-    const apiUrl = `${STORAGE_API_URL}/${this.resourceType}/?auto-thumbnail=true&auto-exif=true`;
+    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/?auto-thumbnail=true&auto-exif=true`;
 
     const response = await handleApiResponse(
       fetch(apiUrl, {
@@ -394,7 +395,7 @@ export class ResourceFetcher<
     resourceId: string,
     formData: FormData
   ): Promise<UpdateResourceSuccessResponse> {
-    const apiUrl = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}`;
+    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}`;
 
     const response = await handleApiResponse(
       fetch(apiUrl, {
@@ -415,7 +416,7 @@ export class ResourceFetcher<
     resourceId: string,
     formData: FormData
   ): Promise<AddResourceContentSuccessResponse> {
-    const apiUrl = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}/contents?auto-exif=true`;
+    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/contents?auto-exif=true`;
 
     const response = await handleApiResponse(
       fetch(apiUrl, {
@@ -436,7 +437,7 @@ export class ResourceFetcher<
     resourceId: string,
     angle: number
   ): Promise<UpdateThumbnailSuccessResponse> {
-    const apiUrl = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}/thumbnail`;
+    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/thumbnail`;
 
     const response = await handleApiResponse(
       fetch(apiUrl, {
@@ -459,7 +460,7 @@ export class ResourceFetcher<
     contentId: number,
     exif_items: Record<string, any>
   ) {
-    const apiUrl = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}/${contentId}/exif`;
+    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/${contentId}/exif`;
 
     const response = await handleApiResponse(
       fetch(apiUrl, {
@@ -482,7 +483,7 @@ export class ResourceFetcher<
     filename: string,
     query?: Record<string, string | number | boolean>
   ): string {
-    const baseUrl = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}/contents/${contentId}/${filename}`;
+    const baseUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/contents/${contentId}/${filename}`;
 
     return query ? `${baseUrl}?${buildQuery(query)}` : baseUrl;
   }
@@ -491,7 +492,7 @@ export class ResourceFetcher<
     resourceId: string,
     query?: Record<string, string | number | boolean>
   ): string {
-    const baseUrl = `${STORAGE_API_URL}/${this.resourceType}/${resourceId}/thumbnails`;
+    const baseUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/thumbnails`;
 
     return query ? `${baseUrl}?${buildQuery(query)}` : baseUrl;
   }
