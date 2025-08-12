@@ -7,7 +7,7 @@
 import fs from "fs";
 import path from "path";
 
-const examplePath = path.resolve(__dirname, "../.env.example");
+const examplePath = path.resolve(__dirname, "../dot_env.example");
 const localPath = path.resolve(__dirname, "../.env.local");
 
 const parseEnv = (content: string) =>
@@ -29,12 +29,12 @@ if (missing.length > 0) {
 }
 
 if (extra.length > 0) {
-  console.warn("⚠️ Extra variables in .env.local (not in .env.example):");
+  console.warn("⚠️ Extra variables in .env.local (not in dot_env.example):");
   extra.forEach((key) => console.warn(`  - ${key}`));
 }
 
 if (missing.length > 0) {
   process.exit(1); // fail CI
 } else {
-  console.log("✅ .env.local matches .env.example");
+  console.log("✅ .env.local matches dot_env.example");
 }
