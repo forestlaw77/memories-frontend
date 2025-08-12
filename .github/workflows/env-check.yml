@@ -11,13 +11,32 @@ on: [push, pull_request]
 jobs:
   validate-env:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node.js
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🛠 Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-      - name: Install dependencies
-        run: npm ci
-      - name: Run env validation
-        run: tsx scripts/validate-env.ts
+
+      - name: 🚀 Install pnpm
+        run: npm install -g pnpm
+
+      - name: 🧰 Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Check tsx availability
+        run: pnpm exec tsx --version
+
+      - name: ✅ Run env validation
+        run: pnpm exec tsx scripts/validate-env.ts
