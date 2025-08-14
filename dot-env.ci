@@ -8,6 +8,10 @@
 # 🔐 Authentication Config
 # ========================
 
+# Local Mode (No Authentication)
+SKIP_AUTH=true
+NEXT_PUBLIC_SKIP_AUTH=true
+
 # URL used by NextAuth for callback and session handling
 NEXTAUTH_URL=http://localhost:8080
 
@@ -38,4 +42,4 @@ GOOGLE_BOOKS_API_KEY=your_google_books_api_key_here
 BACKEND_API_URL=http://memories-storage:4001
 
 # Public API URL exposed to the browser (used in fetch requests)
-NEXT_PUBLIC_BACKEND_API_URL=http://localhost:4001
+NEXT_PUBLIC_BACKEND_API_URL=http://localhost:4001/v1

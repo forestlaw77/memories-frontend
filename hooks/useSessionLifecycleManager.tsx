@@ -6,6 +6,8 @@
 
 "use client";
 
+import { clientEnv } from "@/libs/config/env.client";
+import { fallbackSession } from "@/libs/session/fallback";
 import { getSession, signOut } from "next-auth/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -22,6 +24,8 @@ export function useSessionLifecycleManager({
   const [idleDeadline, setIdleDeadline] = useState<number | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [remainingMinutes, setRemainingMinutes] = useState<number | null>(null);
+
+  const isSkipAuth = clientEnv.NEXT_PUBLIC_SKIP_AUTH === "true";
 
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,11 +44,16 @@ export function useSessionLifecycleManager({
 
   // 初期セッション取得（expiresAt）
   useEffect(() => {
-    getSession().then((session) => {
-      if (session?.expires) {
-        setExpiresAt(new Date(session.expires).getTime());
-      }
-    });
+    if (isSkipAuth) {
+      setExpiresAt(new Date(fallbackSession.expires).getTime());
+    } else {
+      getSession().then((session) => {
+        if (session?.expires) {
+          setExpiresAt(new Date(session.expires).getTime());
+        }
+      });
+    }
+
     resetIdleTimer(); // 初回アクティビティセット
   }, [resetIdleTimer]);
 
@@ -53,10 +62,14 @@ export function useSessionLifecycleManager({
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(async () => {
       resetIdleTimer();
-      const session = await getSession();
-      if (session?.expires) {
-        setExpiresAt(new Date(session.expires).getTime());
-        console.debug("[KeepAlive] Session updated from activity.");
+      if (isSkipAuth) {
+        setExpiresAt(new Date(fallbackSession.expires).getTime());
+      } else {
+        const session = await getSession();
+        if (session?.expires) {
+          setExpiresAt(new Date(session.expires).getTime());
+          console.debug("[KeepAlive] Session updated from activity.");
+        }
       }
     }, 3000); // debounce delay
   }, [resetIdleTimer]);
@@ -102,12 +115,21 @@ export function useSessionLifecycleManager({
     remainingMinutes,
     extendSession: async () => {
       resetIdleTimer();
-      const session = await getSession();
-      if (session?.expires) setExpiresAt(new Date(session.expires).getTime());
+      if (isSkipAuth) {
+        setExpiresAt(new Date(fallbackSession.expires).getTime());
+      } else {
+        const session = await getSession();
+        if (session?.expires) setExpiresAt(new Date(session.expires).getTime());
+      }
+
       setShowWarning(false);
     },
     logout: async () => {
-      await signOut({ redirect: true });
+      if (isSkipAuth) {
+        window.location.href = "/login";
+      } else {
+        await signOut({ redirect: true });
+      }
     },
     dismissWarning: () => setShowWarning(false),
   };

@@ -6,10 +6,12 @@
 
 const rawEnv = {
   NEXT_PUBLIC_BACKEND_API_URL: process.env.NEXT_PUBLIC_BACKEND_API_URL!,
+  NEXT_PUBLIC_SKIP_AUTH: process.env.NEXT_PUBLIC_SKIP_AUTH!,
 } as const;
 
 type ClientEnv = {
   NEXT_PUBLIC_BACKEND_API_URL: string;
+  NEXT_PUBLIC_SKIP_AUTH: string;
 };
 
 export const clientEnv: ClientEnv = rawEnv;

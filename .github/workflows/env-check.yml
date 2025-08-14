@@ -40,3 +40,5 @@ jobs:
 
       - name: ✅ Run env validation
         run: pnpm exec tsx scripts/validate-env.ts
+        env:
+          CI_ENV_PATH: dot-env.ci

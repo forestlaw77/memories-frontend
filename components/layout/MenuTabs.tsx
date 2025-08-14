@@ -9,6 +9,8 @@
 import { ColorModeToggle } from "@/components/common/ColorModeToggle";
 import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import { useSessionLifecycleManager } from "@/hooks/useSessionLifecycleManager";
+import { clientEnv } from "@/libs/config/env.client";
+import { fallbackSession } from "@/libs/session/fallback";
 import {
   Avatar,
   Button,
@@ -79,6 +81,9 @@ const MenuTabs = () => {
   const pathname = usePathname(); // 現在のパスを取得
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false);
   const { settings } = useGlobalSettings();
+  const isSkipAuth = clientEnv.NEXT_PUBLIC_SKIP_AUTH === "true";
+  const effectiveSession = isSkipAuth ? fallbackSession : session;
+
   const {
     showWarning,
     remainingMinutes,
@@ -114,7 +119,7 @@ const MenuTabs = () => {
     return undefined; // 何もアクティブにしない
   };
 
-  console.log("remainingMinutes:", remainingMinutes);
+  //console.log("remainingMinutes:", remainingMinutes);
 
   return (
     <Flex
@@ -190,13 +195,13 @@ const MenuTabs = () => {
           <ColorModeToggle />
         </ClientOnly>
 
-        {session?.user && (
+        {effectiveSession?.user && (
           <Menu.Root onSelect={handleMenuSelect}>
             <Menu.Trigger asChild>
               <Button variant="ghost" size="sm">
                 <Avatar.Root shape="full" size="xs" variant="subtle">
                   <Avatar.Image
-                    src={session.user.image || "/defaultAvatar.png"}
+                    src={effectiveSession.user.image || "/defaultAvatar.png"}
                   />
                 </Avatar.Root>
               </Button>

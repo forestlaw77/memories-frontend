@@ -95,12 +95,12 @@ networks:
 
 Each project requires a `.env.local` the for runtime configuration.
 
-You can start by copying the provided `dot_env.example` files:
+You can start by copying the provided `dot-env.example` files:
 
 ```bash
 # Copy template files to create your local environment configs
-cp memories-frontend/dot_env.example memories-frontend/.env.local
-cp memories-storage/dot_env.example memories-storage/.env.local
+cp memories-frontend/dot-env.example memories-frontend/.env.local
+cp memories-storage/dot-env.example memories-storage/.env.local
 ```
 
 > 🛡️ Note: We use dot_env.example instead of .env.example to avoid accidental inclusion in version control.
@@ -129,7 +129,31 @@ The storage server will be available at http://localhost:4001
 - You can mount sample data into `memories-storage/local_storage` to test resource loading.
 - If you're using VS Code with Remote Containers, the `.vscode-server` volume ensures persistent extensions.
 - UID/GID mapping ensures file permissions match your host system.
-- Environment variables are loaded from `.env.local` in each project. See `.env.example` for reference.
+- Environment variables are loaded from `.env.local` in each project. See `dot-env.example` for reference.
+  > 🛡️ Environment variables are validated automatically in CI using `dot-env.example` and a generated `dot-env.ci`.  
+  > To set up your local environment, copy `dot-env.example` to `.env.local` and fill in the values manually.
+
+### 🧪 Local Mode (No Authentication)
+
+This mode is designed for:
+
+- 🧑‍💻 Local development and testing
+- 👤 Personal use without authentication setup
+- 🚀 Quick onboarding for new contributors
+
+To run Memories locally without authentication:
+
+1. Copy `memories-frontend/dot-env.example` to `memories-frontend/.env.local`
+2. Set `SKIP_AUTH=true`
+3. Set `NEXT_PUBLIC_SKIP_AUTH=true`
+4. Copy `memories-storage/dot-env.example` to `memories-storage/.env.local`
+5. Set `SKIP_AUTH=true`
+6. Run `docker compose up`
+7. You will be logged in automatically as a guest user
+
+> ✅ Guest users are automatically registered on the backend if they don't exist.  
+> ⚠️ Do not use SKIP_AUTH in production environments.  
+> 🛡️ Guest users have limited access and data may not persist across sessions.
 
 ## 🔐 Environment Variable Security
 

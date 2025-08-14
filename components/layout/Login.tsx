@@ -4,6 +4,7 @@
 //   - Commercial use requires a separate commercial license (contact author)
 // You may not use this software for commercial purposes under the MIT License.
 
+import { clientEnv } from "@/libs/config/env.client";
 import {
   Alert,
   Button,
@@ -13,9 +14,12 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 
 export default function Login() {
+  const router = useRouter();
+  const isSkipAuth = clientEnv.NEXT_PUBLIC_SKIP_AUTH === "true";
   return (
     <Flex height="100vh" justify="center" align="center">
       <VStack
@@ -38,16 +42,25 @@ export default function Login() {
             Your session has ended. Please log in again to continue.
           </ChakraText>
         </Alert.Root>
-
-        <Button
-          onClick={() => signIn("google")}
-          colorScheme="blue"
-          size="lg"
-          _hover={{ bg: "blue.500", transform: "scale(1.02)", boxShadow: "md" }}
-          transition="all 0.3s"
-        >
-          <FcGoogle /> Login with Google
-        </Button>
+        {isSkipAuth ? (
+          <Button onClick={() => router.push("/")}>
+            仮ユーザーとして再開する
+          </Button>
+        ) : (
+          <Button
+            onClick={() => signIn("google")}
+            colorScheme="blue"
+            size="lg"
+            _hover={{
+              bg: "blue.500",
+              transform: "scale(1.02)",
+              boxShadow: "md",
+            }}
+            transition="all 0.3s"
+          >
+            <FcGoogle /> Login with Google
+          </Button>
+        )}
       </VStack>
     </Flex>
   );

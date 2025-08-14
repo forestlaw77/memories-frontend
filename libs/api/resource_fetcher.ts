@@ -518,7 +518,9 @@ export function createFetcher<K extends RESOURCE_TYPE>(
   ResourceTypeToMetaMap[K]["detail"]
 > {
   if (!type || !authToken) {
-    throw new RangeError("[createFetcher] ResourceType or authToken is null");
+    throw new RangeError(
+      `[createFetcher] ResourceType(${type}) or authToken(${authToken}) is null`
+    );
   }
   return new ResourceFetcher(type, enableCache, authToken);
 }

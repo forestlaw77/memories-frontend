@@ -6,7 +6,6 @@
 
 "use client";
 
-import { useSession } from "next-auth/react";
 import React, { createContext, useContext, useMemo } from "react";
 
 /**
@@ -39,21 +38,17 @@ const FetcherParamsContext = createContext<FetcherParams | undefined>(
  */
 export const FetcherParamsProvider = ({
   children,
+  accessToken,
+  authToken,
   enableCache,
 }: React.PropsWithChildren<FetcherParams>) => {
-  const { data: session, status } = useSession();
-
-  if (status === "loading") {
-    return <div>Loading authentication...</div>;
-  }
-
   const value = useMemo(
     () => ({
-      accessToken: session?.accessToken,
-      authToken: session?.authToken,
+      accessToken: accessToken,
+      authToken: authToken,
       enableCache,
     }),
-    [session, enableCache]
+    [accessToken, authToken, enableCache]
   );
 
   return (

@@ -7,6 +7,7 @@
 import { MAX_AGE } from "@/config/settings";
 import { env } from "@/libs/config/env.server";
 import logger from "@/libs/logger";
+import { fallbackSession } from "@/libs/session/fallback";
 import NextAuth, { NextAuthOptions, Session } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import GoogleProvider from "next-auth/providers/google";
@@ -14,19 +15,22 @@ import GoogleProvider from "next-auth/providers/google";
 const MILLISECONDS_PER_SECOND = 1000;
 
 export const authOptions: NextAuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID!,
-      clientSecret: env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "openid email profile",
-          access_type: "offline",
-          prompt: "consent",
-        },
-      },
-    }),
-  ],
+  providers:
+    env.SKIP_AUTH === "true"
+      ? []
+      : [
+          GoogleProvider({
+            clientId: env.GOOGLE_CLIENT_ID!,
+            clientSecret: env.GOOGLE_CLIENT_SECRET!,
+            authorization: {
+              params: {
+                scope: "openid email profile",
+                access_type: "offline",
+                prompt: "consent",
+              },
+            },
+          }),
+        ],
   secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
@@ -35,6 +39,48 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, account }) {
+      const isSkipAuth = env.SKIP_AUTH === "true";
+      if (isSkipAuth) {
+        const backendApiUrl = env.BACKEND_API_URL;
+        const accessToken = fallbackSession.accessToken;
+        const email = fallbackSession.user.email;
+        const name = fallbackSession.user.name;
+        const avatar = fallbackSession.user.image;
+
+        try {
+          const response = await fetch(`${backendApiUrl}/v1/users/check`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ email }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (!data.exist) {
+              await fetch(`${backendApiUrl}/v1/users/register`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({ email, name, avatar }),
+              });
+            }
+          }
+        } catch (error) {
+          logger.error("🚨 SKIP_AUTH user registration failed:", error);
+        }
+
+        return {
+          ...token,
+          sub: fallbackSession.user.id,
+          accessToken: fallbackSession.accessToken,
+          idToken: fallbackSession.authToken,
+        };
+      }
       if (account) {
         token.accessToken = account.access_token;
         token.idToken = account.id_token;
@@ -65,26 +111,41 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }: { session: Session; token: JWT }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
-      }
-      session.accessToken = token.accessToken as string | undefined;
-      session.authToken = token.idToken as string | undefined;
+      const { user: fallbackUser } = fallbackSession;
+      session.user = {
+        ...session.user,
+        id: token.sub ?? fallbackUser.id,
+        name: session.user?.name ?? fallbackUser.name,
+        email: session.user?.email ?? fallbackUser.email,
+        image: session.user?.image ?? fallbackUser.image,
+      };
+      session.accessToken = token.accessToken as string | undefined; // fallbackしてはいけない
+      session.authToken = token.idToken as string | undefined; // fallbackしてはいけない
       logger.log("authToken:", token.idToken);
       return session;
     },
     async signIn({ user, account }) {
-      const accessToken = account?.access_token;
-
-      if (!accessToken) {
-        logger.error("Google OAuth: Missing access token");
-        return false;
-      }
+      const { user: fallbackUser, accessToken: fallbackAccessToken } =
+        fallbackSession;
 
       const backendApiUrl = env.BACKEND_API_URL;
       if (!backendApiUrl) {
         logger.error("BACKEND_API_URL environment variable is not set.");
-        return false; // またはエラーをスロー
+        return false;
+      }
+
+      const isSkipAuth = env.SKIP_AUTH === "true";
+
+      const accessToken = isSkipAuth
+        ? fallbackAccessToken
+        : account?.access_token;
+      const email = isSkipAuth ? fallbackUser.email : user.email;
+      const name = isSkipAuth ? fallbackUser.name : user.name;
+      const avatar = isSkipAuth ? fallbackUser.image : user.image;
+
+      if (!accessToken) {
+        logger.error("Google OAuth: Missing access token");
+        return false;
       }
 
       const authHeader = `Bearer ${accessToken}`;
@@ -96,7 +157,7 @@ export const authOptions: NextAuthOptions = {
             "Content-Type": "application/json",
             Authorization: authHeader,
           },
-          body: JSON.stringify({ email: user.email }),
+          body: JSON.stringify({ email }),
         });
 
         if (!response.ok) {
@@ -112,9 +173,9 @@ export const authOptions: NextAuthOptions = {
               Authorization: authHeader,
             },
             body: JSON.stringify({
-              email: user.email,
-              name: user.name,
-              avatar: user.image,
+              email,
+              name,
+              avatar,
             }),
           });
         }
@@ -170,7 +231,7 @@ async function refreshAccessToken(token: JWT) {
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
-      idToken: newIdToken ?? token.idToken, // ← fallback
+      idToken: newIdToken ?? token.idToken,
       expiresAt:
         Date.now() + refreshedTokens.expires_in * MILLISECONDS_PER_SECOND,
       idTokenExpiresAt: newIdTokenExpiresAt,
