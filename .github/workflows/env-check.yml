@@ -1,0 +1,44 @@
+# Copyright (c) 2025 Tsutomu FUNADA
+# This software is licensed for:
+#   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+#   - Commercial use requires a separate commercial license (contact author)
+# You may not use this software for commercial purposes under the MIT License.
+
+name: Validate .env consistency
+
+on: [push, pull_request]
+
+jobs:
+  validate-env:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🛠 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: 🚀 Install pnpm
+        run: npm install -g pnpm
+
+      - name: 🧰 Cache pnpm store
+        uses: actions/cache@v3
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 📥 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Check tsx availability
+        run: pnpm exec tsx --version
+
+      - name: ✅ Run env validation
+        run: pnpm exec tsx scripts/validate-env.ts
+        env:
+          CI_ENV_PATH: dot-env.ci
