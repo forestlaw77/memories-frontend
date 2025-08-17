@@ -12,5 +12,5 @@
   "entryPointStrategy": "expand",
   "out": "build/docs",
   "tsconfig": "tsconfig.doc.json"
-  //"includeTags": ["todo"]
+  //"includeTags": ["@todo"]
 }
