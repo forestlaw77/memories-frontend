@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "app",
+    "assets",
+    "components",
+    "config",
+    "context",
+    "features",
+    "hooks",
+    "libs",
+    "types",
+    "utils"
+  ],
+  "exclude": ["**/.next/**", "node_modules"],
+  "compilerOptions": {
+    "baseUrl": ".", // 必須：paths の解決に必要
+    "paths": {
+      "@/*": ["./*"] // Next.js のエイリアスを明示
+    },
+    "typeRoots": ["./types", "./node_modules/@types"], // 明示的に両方含める
+    "types": ["next-auth"] // 型定義を明示
+  }
+}

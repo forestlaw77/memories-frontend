@@ -1,0 +1,16 @@
+{
+  "entryPoints": [
+    "app/page.tsx",
+    "app",
+    "components",
+    "context",
+    "features",
+    "hooks",
+    "libs",
+    "utils"
+  ],
+  "entryPointStrategy": "expand",
+  "out": "build/docs",
+  "tsconfig": "tsconfig.doc.json",
+  "includeTags": ["todo"]
+}

@@ -6,7 +6,7 @@
 
 "use client";
 import { BiSortAlt2, MdDelete, SiGithubactions } from "@/assets/icons";
-import { ActiveFilterTags } from "@/components/settings/ActiveFilterTags";
+import ActiveFilterTags from "@/components/settings/ActiveFilterTags";
 import FilterAccordionSection from "@/components/settings/FilterAccordionSection";
 import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import {

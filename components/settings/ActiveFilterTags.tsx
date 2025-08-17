@@ -1,67 +1,83 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module ActiveFilterTags
+ */
 
 "use client";
 
+import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import {
-  defaultInitialSettings,
   GlobalSettingsAction,
   GlobalSettingsState,
-  useGlobalSettings,
-} from "@/contexts/GlobalSettingsContext";
+} from "@/contexts/globalSettingsTypes";
+import { defaultInitialSettings } from "@/contexts/globalSettingsUtils";
 import { HStack, IconButton, Tag } from "@chakra-ui/react";
 import { MdClose } from "react-icons/md";
 import { getActiveFilterCount } from "./FilterAccordionSection";
 
-type StringKeysOnly = {
-  [K in keyof GlobalSettingsState]: GlobalSettingsState[K] extends string
-    ? K
-    : never;
-}[keyof GlobalSettingsState];
-
-export function ActiveFilterTags({
-  setPage,
-}: {
+export type ActiveFilterTagsProps = {
   setPage: (page: number) => void;
-}) {
-  const { settings, dispatch } = useGlobalSettings();
-  const filters: {
-    label: string;
-    value: string | undefined;
-    key: keyof GlobalSettingsState;
-  }[] = [
-    {
-      label: "Keyword",
-      value: settings.searchQuery,
-      key: "searchQuery" as keyof GlobalSettingsState,
-    },
-    {
-      label: "Country",
-      value: settings.filterCountry,
-      key: "filterCountry" as keyof GlobalSettingsState,
-    },
-    {
-      label: "Genre",
-      value: settings.filterGenre,
-      key: "filterGenre" as keyof GlobalSettingsState,
-    },
-    {
-      label: "From",
-      value: settings.filterDateFrom,
-      key: "filterDateFrom" as keyof GlobalSettingsState,
-    },
-    {
-      label: "To",
-      value: settings.filterDateTo,
-      key: "filterDateTo" as keyof GlobalSettingsState,
-    },
-  ].filter(
-    (f) => f.value && f.value !== (defaultInitialSettings[f.key] as string)
-  );
+};
 
+/**
+ * `ActiveFilterTags` displays a list of currently active filters as removable tags.
+ * Each tag represents a filter field (e.g. keyword, country, genre) and allows the user
+ * to clear it individually or reset all filters at once.
+ *
+ * This component is context-aware and interacts with `GlobalSettingsContext` to update state.
+ *
+ * @param setPage - A callback to reset pagination when filters are cleared
+ * @component
+ * @example
+ * ```tsx
+ * <ActiveFilterTags setPage-{setPage} />
+ * ```
+ * @returns JSX.Element
+ */
+export default function ActiveFilterTags({ setPage }: ActiveFilterTagsProps) {
+  const { settings, dispatch } = useGlobalSettings();
+
+  /**
+   * Mapping of filter keys to their display labels.
+   * Only includes keys relevant to filtering UI.
+   */
+  const filterConfig = {
+    searchQuery: "Keyword",
+    filterCountry: "Country",
+    filterGenre: "Genre",
+    filterDateFrom: "From",
+    filterDateTo: "To",
+  } satisfies Partial<Record<keyof GlobalSettingsState, string>>;
+
+  /**
+   * Constructs an array of active filters based on current settings.
+   * Filters are included only if their value differs from the default.
+   */
+  const filters = (
+    Object.entries(filterConfig) as Array<[keyof GlobalSettingsState, string]>
+  )
+    .map(([key, label]) => ({
+      label,
+      value: settings[key] as string | undefined,
+      key,
+    }))
+    .filter(
+      (f) => f.value && f.value !== (defaultInitialSettings[f.key] as string)
+    );
+
+  /**
+   * Dispatches a setting update to the global context.
+   * Ensures type-safe updates for individual filter keys.
+   *
+   * @param key - The setting key to update
+   * @param value - The new value to assign
+   */
   function dispatchSetting<K extends keyof GlobalSettingsState>(
     key: K,
     value: GlobalSettingsState[K]
@@ -69,6 +85,10 @@ export function ActiveFilterTags({
     dispatch({ type: key, value } as GlobalSettingsAction);
   }
 
+  /**
+   * Clears all active filters by resetting them to their default values.
+   * Also resets pagination to the first page.
+   */
   function clearAllFilters() {
     filters.forEach((f) =>
       dispatchSetting(
@@ -78,6 +98,7 @@ export function ActiveFilterTags({
     );
   }
 
+  /** Number of active filters, used to conditionally render "Clear All" */
   const tagCount = getActiveFilterCount(settings);
 
   return (

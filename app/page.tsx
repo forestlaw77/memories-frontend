@@ -1,8 +1,11 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ */
 
 "use client";
 
@@ -11,7 +14,10 @@ import { Dashboard } from "@/features/statistics/Dashboard";
 import { Box, Flex, Heading, Image, Text } from "@chakra-ui/react";
 import NextLink from "next/link";
 
-// リソースメニューの定義（resourceType 追加、path を動的設定）
+/**
+ * Defines the resource menu displayed on the homepage.
+ * Each item includes a name, resource type, icon path, color, and dynamically generated path.
+ */
 const resourceMenu = [
   {
     name: "Bookshelf",
@@ -43,20 +49,29 @@ const resourceMenu = [
     icon: "/video library icon.png",
     color: "#9966FF",
   },
-].map((item) => ({ ...item, path: `/${item.resourceType}` }));
+].map((item) => ({
+  ...item,
+  path: `/${item.resourceType}`,
+}));
 
+/**
+ * The main homepage component for the Memories platform.
+ *
+ * @returns A React component that renders the welcome header, resource navigation cards, and dashboard.
+ */
 export default function Home() {
   return (
     <div>
       <DynamicBreadcrumb />
-      {/* ヘッダー部分 */}
+
+      {/* Header section */}
       <Flex justify="space-between" align="center" mb={6}>
         <Heading as="h1" size="lg">
           Welcome Memories
         </Heading>
       </Flex>
 
-      {/* リソース一覧のリンク */}
+      {/* Resource navigation cards */}
       <Flex mt={6} wrap="wrap" gap={4}>
         {resourceMenu.map((resource) => (
           <NextLink href={resource.path} key={resource.resourceType}>
@@ -79,7 +94,6 @@ export default function Home() {
                 color={resource.color}
                 bg="white"
                 textAlign="center"
-                //textShadow="2px 2px 4px rgba(0, 0, 0, 0.3)"
               >
                 {resource.name}
               </Text>
@@ -87,6 +101,7 @@ export default function Home() {
           </NextLink>
         ))}
       </Flex>
+
       <Dashboard />
     </div>
   );

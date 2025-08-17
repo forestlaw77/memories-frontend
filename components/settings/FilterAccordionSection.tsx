@@ -1,18 +1,27 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module FilterAccordionSection
+ * @description
+ * Accordion-based UI for advanced filtering of memory entries.
+ * Supports country, genre, keyword, and date range filters.
+ * Integrates with GlobalSettingsContext and Chakra UI components.
+ */
 
 "use client";
 
 import { FaFilter } from "@/assets/icons";
+import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
+import { GlobalSettingsState } from "@/contexts/globalSettingsTypes";
 import {
   defaultInitialSettings,
   defaultInitialSettings as globalInitialState,
-  GlobalSettingsState,
-  useGlobalSettings,
-} from "@/contexts/GlobalSettingsContext";
+} from "@/contexts/globalSettingsUtils";
 import {
   countryOptions,
   genreOptions,
@@ -40,16 +49,39 @@ const filterKeys: Array<keyof GlobalSettingsState> = [
   "filterDateTo",
 ];
 
+/**
+ * Props for `FilterAccordionSection`.
+ *
+ * @property setPage - Callback to reset pagination when filters change.
+ */
+export type FilterAccordionSectionProps = {
+  setPage: (page: number) => void;
+};
+
+/**
+ * A React component that renders a collapsible accordion for data filtering.
+ *
+ * This component manages filter inputs for search queries, country, genre, and
+ * date ranges. It reads and writes the filter state to the global settings context.
+ * When a filter is applied, it calls the `setPage` prop to reset the pagination.
+ *
+ * @param {FilterAccordionSectionProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered filter accordion UI.
+ *
+ * @example
+ * ```tsx
+ * <FilterAccordionSection setPage={handlePageReset} />
+ * ```
+ */
 export default function FilterAccordionSection({
   setPage,
-}: {
-  setPage: (page: number) => void;
-}) {
+}: FilterAccordionSectionProps) {
   const { settings, updateSetting } = useGlobalSettings();
   const [searchQuery, setSearchQuery] = useState(settings.searchQuery);
   const [localDateFrom, setLocalDateFrom] = useState(settings.filterDateFrom);
   const [localDateTo, setLocalDateTo] = useState(settings.filterDateTo);
 
+  // Sync local state with global context when search query changes
   useEffect(() => {
     setSearchQuery(settings.searchQuery);
   }, [settings.searchQuery]);
@@ -82,6 +114,18 @@ export default function FilterAccordionSection({
       }),
     []
   );
+
+  /**
+   * Clears all active filters by resetting them to their default values.
+   * Also resets pagination to the first page.
+   *
+   * This function updates the global settings context for each filter key.
+   *
+   * @example
+   * ```ts
+   * clearAllFilters(); // Resets all filters and pagination
+   * ```
+   */
 
   function clearAllFilters() {
     filterKeys.forEach((k) => {
@@ -254,6 +298,21 @@ export default function FilterAccordionSection({
   );
 }
 
+/**
+ * Calculates the number of active filters by comparing current settings
+ * against the default initial state.
+ *
+ * Used to conditionally render UI elements like "Clear Filters" or tag count.
+ *
+ * @param settings - The current global settings state
+ * @returns Number of filters that differ from their default values
+ *
+ * @example
+ * ```ts
+ * const count = getActiveFilterCount(settings);
+ * if (count > 0) showClearButton();
+ * ```
+ */
 export function getActiveFilterCount(settings: GlobalSettingsState): number {
   let count = 0;
 

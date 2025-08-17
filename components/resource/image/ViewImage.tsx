@@ -212,7 +212,7 @@ export default function ViewImage({
             }}
           >
             <GeoMap
-              markers={[{ lat: latitude, lng: longitude, id: undefined }]}
+              markers={[{ lat: latitude, lng: longitude, id: resourceId }]}
               initialCenter={[latitude, longitude]}
               initialZoom={15}
             />

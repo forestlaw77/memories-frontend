@@ -1,8 +1,21 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module ResourceFilterSettings
+ * @description
+ * A settings form section for configuring resource filters such as keyword, country, genre, and date range.
+ * This component reads and updates the global application state for these filter values.
+ * 
+ * @todo Add validation for date range (from <= to)
+ * @todo Add "Clear Filters" button for quick reset
+ * @todo Support multi-select for genre filtering
+
+ */
 
 "use client";
 
@@ -24,12 +37,38 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useColorModeValue } from "../ui/color-mode";
 
-export default function () {
+/**
+ * Props for `ResourceFilterSettings`.
+ * Currently unused, but reserved for future extensibility.
+ * Future extensions may include `onChange` or `onReset` callbacks.
+ */
+export type ResourceFilterSettingsProps = {};
+
+/**
+ * A React component that provides a user interface for filtering resources.
+ *
+ * This component includes input fields and select menus for filtering by
+ * keyword, country, genre, and a specific date range. It synchronizes its
+ * state with the global settings context, allowing for a consistent filter
+ * state across the application.
+ *
+ * @param {ResourceFilterSettingsProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered resource filter settings UI.
+ *
+ * @example
+ * ```tsx
+ * <ResourceFilterSettings />
+ * ```
+ */
+export default function ResourceFilterSettings(
+  props: ResourceFilterSettingsProps
+) {
   const { settings, updateSetting } = useGlobalSettings();
   const [searchQuery, setSearchQuery] = useState(settings.searchQuery);
   const [localDateFrom, setLocalDateFrom] = useState(settings.filterDateFrom);
   const [localDateTo, setLocalDateTo] = useState(settings.filterDateTo);
 
+  // Sync local input state with global context when external changes occur
   useEffect(() => {
     setSearchQuery(settings.searchQuery);
   }, [settings.searchQuery]);
@@ -42,6 +81,15 @@ export default function () {
     setLocalDateTo(settings.filterDateTo);
   }, [settings.filterDateTo]);
 
+  /**
+   * Updates the global search query setting when input loses focus or Enter is pressed.
+   * Triggers a context update without resetting pagination.
+   *
+   * @example
+   * ```ts
+   * <Input onBlur={searchQueryHandleBlur} />
+   * ```
+   */
   const searchQueryHandleBlur = useCallback(() => {
     updateSetting("searchQuery", searchQuery);
   }, [searchQuery]);

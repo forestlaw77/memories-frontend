@@ -211,12 +211,24 @@ Memories is built with:
 
 ```bash
 src/
-├── components/ # Reusable UI elements
-├── features/ # Domain-specific modules (map, slideshow, settings)
-├── hooks/ # Custom logic and state accessors
-├── utils/ # Shared helpers and constants
-├── assets/ # Icons, images, and static files
-└── page.tsx # Root component
+├── app/               # Next.js App Router structure
+│   ├── [resourceType] # Dynamic routes
+│   ├── api/           # Route handlers
+│   ├── login/         # Auth page
+│   └── page.tsx       # Root component
+├── assets/            # Icons, images, and static files
+├── components/        # Reusable UI elements
+├── config/            # Runtime configuration
+├── context/           # React context providers
+├── features/          # Domain-specific modules (map, slideshow, settings)
+├── hooks/             # Custom logic and state accessors
+├── libs/              # External integrations and wrappers
+├── public/            # Static assets served by Next.js
+├── screenshots/       # UI snapshots and design references
+├── scripts/           # Dev and build automation
+├── styles/            # Global and modular styles
+├── types/             # Shared type definitions
+└── utils/             # Shared helpers and constants
 ```
 
 ## ✅ Next Steps
@@ -230,7 +242,7 @@ src/
 
 After starting the development server:
 
-- Access the app at http://localhost:5173
+- Access the app at http://localhost:8080
 - Use the sidebar to filter resources by keyword, country, genre, or date
 - Switch between Map View and Slideshow View using the top navigation
 - Customize preferences via the settings panel (theme, zoom mode, caching behavior)

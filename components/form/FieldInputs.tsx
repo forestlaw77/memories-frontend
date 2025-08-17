@@ -17,7 +17,7 @@ import {
   Text,
   Textarea,
 } from "@chakra-ui/react";
-import BarcodeScanner from "react-qr-barcode-scanner";
+// import BarcodeScanner from "react-qr-barcode-scanner";
 
 interface FieldInputsProps {
   fields: FieldConfig[];
@@ -108,7 +108,7 @@ export function FieldInputs({
       )}
       {barcodeSupport?.showScanner && (
         <div>
-          <BarcodeScanner onScanSuccess={barcodeSupport?.onScanSuccess} />
+          {/*  <BarcodeScanner onScanSuccess={barcodeSupport?.onScanSuccess} /> */}
           <Button
             colorPalette="red"
             onClick={() => barcodeSupport?.setShowScanner(false)}

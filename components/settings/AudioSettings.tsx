@@ -1,13 +1,19 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module AudioSettings
+ */
 
 "use client";
 
 import { MdClose } from "@/assets/icons";
 import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
+import { BgmTrack } from "@/contexts/globalSettingsTypes";
 import {
   Box,
   Text as ChakraText,
@@ -21,7 +27,22 @@ import {
 } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 
-export default function AudioSettings() {
+export type AudioSettingsProps = {};
+
+/**
+ * `AudioSettings` displays and manages global audio preferences,
+ * including background music (BGM) enablement, volume control, and playlist management.
+ *
+ * This component reads from and dispatches updates to `GlobalSettingsContext`.
+ *
+ * @component
+ * @example
+ * ```tsx
+ * <AudioSettings />
+ * ```
+ * @returns JSX.Element
+ */
+export default function AudioSettings(props: AudioSettingsProps) {
   const { settings, dispatch } = useGlobalSettings();
 
   return (
@@ -34,7 +55,7 @@ export default function AudioSettings() {
         borderColor={useColorModeValue("gray.300", "gray.600")}
         bgColor={useColorModeValue("gray.50", "gray.800")}
       >
-        {/* BGM */}
+        {/* Toggle BGM */}
         <Field.Root orientation="horizontal">
           <Field.Label whiteSpace="nowrap">Enable BGM</Field.Label>
           <Switch.Root
@@ -48,11 +69,11 @@ export default function AudioSettings() {
           </Switch.Root>
         </Field.Root>
 
+        {/* BGM Volume Slider */}
         <Field.Root orientation="horizontal">
           <Field.Label whiteSpace="nowrap">BGM Volume</Field.Label>
           <Slider.Root
             minW="250px"
-            //maxW="sm"
             size="sm"
             defaultValue={[settings.bgmVolume * 100.0]}
             onValueChange={(e) =>
@@ -72,11 +93,11 @@ export default function AudioSettings() {
           </Slider.Root>
         </Field.Root>
 
-        {/* BGM 楽曲設定 */}
+        {/* BGM Playlist Display and Removal */}
         <Field.Root orientation="horizontal">
-          <Field.Label whiteSpace={"nowrap"}>BGM Playlist</Field.Label>
+          <Field.Label whiteSpace="nowrap">BGM Playlist</Field.Label>
           <Box>
-            {settings.bgmPlaylist?.map((track, idx) => (
+            {settings.bgmPlaylist?.map((track: BgmTrack, idx) => (
               <Flex key={idx} align="center" justify="space-between">
                 <Box>
                   <ChakraText fontSize="sm">{track.title}</ChakraText>

@@ -6,10 +6,8 @@
 
 "use client";
 
-import {
-  defaultInitialSettings,
-  useGlobalSettings,
-} from "@/contexts/GlobalSettingsContext";
+import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
+import { defaultInitialSettings } from "@/contexts/globalSettingsUtils";
 import {
   BaseContentMeta,
   BaseDetailMeta,

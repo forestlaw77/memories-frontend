@@ -44,3 +44,5 @@ next-env.d.ts
 # backup
 *~
 /old_git
+*storybook.log
+storybook-static

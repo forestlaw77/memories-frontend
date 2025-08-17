@@ -35,7 +35,7 @@ import { FiLogOut, FiSettings } from "react-icons/fi";
 import { GiBookshelf } from "react-icons/gi";
 import { IoMdPhotos } from "react-icons/io";
 import { IoDocumentTextOutline } from "react-icons/io5";
-import { PreferencesDrawer } from "../settings/PreferencesDrawer";
+import PreferencesDrawer from "../settings/PreferencesDrawer";
 import { SessionCountdownBanner } from "./SessionCountdownBanner";
 
 export const resourceMenu = [
