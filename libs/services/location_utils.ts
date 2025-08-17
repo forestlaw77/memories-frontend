@@ -1,35 +1,13 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ */
 
 import { getCountryCenter } from "../maps/country_center_map";
-
-// const COUNTRY_CENTER_MAP: { [key: string]: [number, number] } = {
-//   Australia: [-25, 135],
-//   China: [35, 105],
-//   France: [46, 2],
-//   Germany: [51, 9],
-//   Japan: [36.2048, 138.2529],
-//   Singapore: [1.3667, 103.8],
-//   "South Korea": [37, 127.5],
-//   Malaysia: [2.5, 112.5],
-//   "New Zealand": [-42, 174],
-//   Taiwan: [23.5, 121],
-//   "United Kingdom": [55.3781, -3.436],
-//   "United States": [37.0902, -95.7129],
-//   Vietnam: [21.0279, 105.851],
-// };
-
-// export function getCountryCenter(
-//   country: string | null | undefined
-// ): [number, number] {
-//   if (country) {
-//     return COUNTRY_CENTER_MAP[country] || [0, 0];
-//   }
-//   return [0, 0];
-// }
 
 const STATE_CENTER_MAP: { [key: string]: { [key: string]: [number, number] } } =
   {

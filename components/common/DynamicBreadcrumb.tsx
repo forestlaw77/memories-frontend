@@ -1,8 +1,13 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @license
+ * Copyright (c) 2025 Tsutomu FUNADA
+ *
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ *
+ * You may not use this software for commercial purposes under the MIT License.
+ */
 
 "use client";
 
@@ -12,13 +17,38 @@ import { usePathname, useSearchParams } from "next/navigation";
 import React from "react";
 import { FcHome } from "react-icons/fc";
 
-interface DynamicBreadcrumbProps {
-  backLinkOverride?: string; // オプションで戻り先リンクを指定
+/**
+ * Props for the {@link DynamicBreadcrumb} component.
+ *
+ * @property pathname - Optional pathname to override the current route. Useful for Storybook or testing.
+ * @property searchParams - Optional URLSearchParams to override query parameters. Enables reproducible routing state.
+ * @property backLinkOverride - Optional override for the first breadcrumb link (typically used for "back" navigation).
+ */
+export interface DynamicBreadcrumbProps {
+  pathname?: string;
+  searchParams?: URLSearchParams;
+  backLinkOverride?: string;
 }
 
-const DynamicBreadcrumb = ({ backLinkOverride }: DynamicBreadcrumbProps) => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+/**
+ * Renders a dynamic breadcrumb trail based on the current pathname and search parameters.
+ * Falls back to Next.js routing hooks if props are not provided, enabling seamless integration
+ * with both runtime and testing environments.
+ *
+ * - The first segment can be overridden with `backLinkOverride`.
+ * - Intermediate segments preserve query parameters (e.g., `?page=2`) for reproducibility.
+ * - The last segment is rendered as plain text.
+ *
+ * @param props - {@link DynamicBreadcrumbProps}
+ * @returns A breadcrumb UI component with Chakra UI styling.
+ */
+const DynamicBreadcrumb = ({
+  pathname: injectedPathname,
+  searchParams: injectedSearchParams,
+  backLinkOverride,
+}: DynamicBreadcrumbProps) => {
+  const pathname = injectedPathname ?? usePathname();
+  const searchParams = injectedSearchParams ?? useSearchParams();
   const queryString = searchParams.toString();
 
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -26,7 +56,7 @@ const DynamicBreadcrumb = ({ backLinkOverride }: DynamicBreadcrumbProps) => {
   const breadcrumbs = pathSegments.map((segment, index) => {
     const hrefBase = `/${pathSegments.slice(0, index + 1).join("/")}`;
 
-    // 一覧ページ（第2階層）にだけ状態付きリンクを反映する
+    // Apply query string only to intermediate segments
     const href =
       index === 0 && backLinkOverride
         ? backLinkOverride

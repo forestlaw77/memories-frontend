@@ -1,16 +1,23 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module ArrayUtils
+ * @description
+ * Provides utility functions for array manipulation.
+ */
 
 /**
  * Shuffles the elements of an array using the Fisher-Yates (Knuth) shuffle algorithm.
  *
- * This function returns a new array with the elements randomly rearranged.
+ * This function creates and returns a new array with its elements randomly rearranged.
  * The original array remains unmodified.
  *
- * @template T The type of elements in the array.
+ * @template T - The type of elements in the array.
  * @param {T[]} array - The array to shuffle.
  * @returns {T[]} A new array with the elements randomly shuffled.
  *
