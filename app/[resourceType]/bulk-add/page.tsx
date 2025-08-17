@@ -1,8 +1,16 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module BulkAddResource
+ * @description
+ * This module provides a client-side component for bulk uploading and registering
+ * multiple resource files at once.
+ */
 
 "use client";
 
@@ -24,6 +32,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
 
+/**
+ * A client-side component for bulk adding resources.
+ *
+ * This component allows users to select multiple files and upload them to be
+ * registered as new resources. It displays the upload progress, provides
+ * real-time feedback with toasts, and navigates back to the main resource page
+ * upon completion.
+ *
+ * @returns {JSX.Element} A React component for the bulk resource addition page.
+ */
 export default function BulkAddResource() {
   const params = useParams();
   const resourceType = params.resourceType as RESOURCE_TYPE;
@@ -40,12 +58,21 @@ export default function BulkAddResource() {
   );
   const queryClient = useQueryClient();
 
+  /**
+   * Handles the file selection from the input element.
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The file input change event.
+   */
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (event.target.files) {
       setFiles(Array.from(event.target.files));
     }
   }
 
+  /**
+   * Handles the form submission, uploading each file individually.
+   * It shows a progress bar and provides toast notifications for the overall process.
+   * @param {React.FormEvent} e - The form submission event.
+   */
   async function handleSubmit(e: React.FormEvent) {
     if (!fetcher) {
       return;
@@ -83,22 +110,25 @@ export default function BulkAddResource() {
     });
 
     Promise.allSettled(promises).then(() => {
-      setFiles([]); // ✅ ファイル選択リセット
+      setFiles([]); // Reset the file selection
       queryClient.invalidateQueries({
-        queryKey: ["allResources", resourceType], // ← useQuery と一致させてください
+        queryKey: ["allResources", resourceType], // Invalidate the main resource list query to refresh the data
       });
       router.push(`/${resourceType}`);
     });
   }
 
+  // Calculate the progress value for the progress bar
   const progressValue =
     files.length > 0 ? (completedCount / files.length) * 100 : 0;
 
+  // Retrieve the return page from session storage for breadcrumb navigation
   const returnPage =
     typeof window !== "undefined"
       ? sessionStorage.getItem("returnPageNumber")
       : null;
 
+  // Determine the breadcrumb's back link
   const breadcrumbBackHref = returnPage
     ? `/${resourceType}?page=${returnPage}`
     : `/${resourceType}`;

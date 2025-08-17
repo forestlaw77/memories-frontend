@@ -1,8 +1,16 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module EditResource
+ * @description
+ * This module provides a client-side component for editing the metadata of a single resource,
+ * including its details and thumbnail.
+ */
 
 "use client";
 
@@ -28,17 +36,30 @@ import { Box, HStack, Spinner } from "@chakra-ui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+
+/**
+ * A client-side component for editing a single resource.
+ *
+ * This component fetches a specific resource and its thumbnail, displays them for editing,
+ * and handles updates to both the resource's metadata and its thumbnail rotation.
+ * It uses `react-query` for data fetching and mutation management, and custom hooks
+ * for form submission and search functionality.
+ *
+ * @returns {JSX.Element} The React component for the resource editing page.
+ */
 export default function EditResource() {
   const params = useParams();
   const resourceType = params.resourceType as RESOURCE_TYPE;
   const resourceId = params.resourceId as string;
   const { authToken, enableCache } = useFetcherParams();
 
+  // Memoize the fetcher instance to avoid re-creation
   const fetcher = useMemo(
     () => createFetcher(resourceType, enableCache, authToken),
     [resourceType, enableCache, authToken]
   );
 
+  // Use react-query to fetch resource data
   const {
     data: resource,
     isLoading: isLoadingResource,
@@ -53,6 +74,7 @@ export default function EditResource() {
     gcTime: 1000 * 60 * 10,
   });
 
+  // Use react-query to fetch the thumbnail blob
   const {
     data: thumbnailBlob,
     isLoading: isLoadingThumbnail,
@@ -71,12 +93,13 @@ export default function EditResource() {
 
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
+  // Create and revoke a URL for the thumbnail blob
   useEffect(() => {
     if (thumbnailBlob) {
       const url = URL.createObjectURL(thumbnailBlob);
       setThumbnailUrl(url);
 
-      // クリーンアップ関数で以前の URL を解放
+      // Cleanup function to release the previous URL
       return () => {
         URL.revokeObjectURL(url);
       };
@@ -86,6 +109,8 @@ export default function EditResource() {
   }, [thumbnailBlob]);
 
   const [formData, setFormData] = useState<{ [key: string]: string }>({});
+
+  // Initialize form data with resource detail metadata
   useEffect(() => {
     if (resource && resource.detailMeta) {
       const filteredData: { [key: string]: string } = {};
@@ -105,6 +130,7 @@ export default function EditResource() {
   const handleSearch = useHandleSearch(resourceType);
   const generateQueryParams = useGenerateQueryParams(resourceType);
 
+  // Show toasts for various loading and error states
   useEffect(() => {
     if (isErrorResource) {
       toaster.create({
@@ -139,6 +165,8 @@ export default function EditResource() {
   const isLoadingCombined = isLoadingResource || isLoadingThumbnail;
 
   const queryClient = useQueryClient();
+
+  // Mutation for rotating the resource's thumbnail
   const updateThumbnailMutation = useMutation({
     mutationFn: async (angle: number) => {
       if (!fetcher) throw new Error("Fetcher not initialized.");
@@ -164,6 +192,11 @@ export default function EditResource() {
     },
   });
 
+  /**
+   * Converts a numeric EXIF orientation value to an angle in degrees.
+   * @param {number} orientation - The numeric EXIF orientation value.
+   * @returns {number} The corresponding angle in degrees (0, 90, 180, or 270).
+   */
   function orientationToAngle(orientation: number): number {
     switch (orientation) {
       case 3:
@@ -178,6 +211,12 @@ export default function EditResource() {
         return 0; // 1, 2, 4
     }
   }
+
+  /**
+   * Converts an angle in degrees to a numeric EXIF orientation value.
+   * @param {number} angle - The angle in degrees (e.g., 90, 180, 270).
+   * @returns {number} The corresponding numeric EXIF orientation value.
+   */
   function angleToOrientation(angle: number): number {
     switch (angle % 360) {
       case 90:
@@ -191,6 +230,7 @@ export default function EditResource() {
     }
   }
 
+  // Mutation for updating the content's EXIF orientation for image resources
   const updateContentMutation = useMutation({
     mutationFn: async (angle: number) => {
       if (!fetcher) throw new Error("Fetcher not initialized.");
@@ -223,11 +263,17 @@ export default function EditResource() {
     },
   });
 
+  /**
+   * Handles the rotation application logic for both thumbnail and content.
+   * For images, it updates the original content's EXIF data. For other types,
+   * it rotates the thumbnail.
+   * @param {number} angle - The angle to rotate by (e.g., 90, 180, 270).
+   */
   function onApplyRotation(angle: number) {
     if (resourceType != RESOURCE_TYPE.IMAGES) {
       return updateThumbnailMutation.mutate(angle);
     } else {
-      // 画像の場合は、代表コンテンツ(contentId 1 の画像を回転させる)
+      // For images, rotate the main content (contentId 1)
       return updateContentMutation.mutate(angle);
     }
   }

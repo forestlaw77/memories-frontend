@@ -1,8 +1,16 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module ContentList
+ * @description
+ * This module provides a dynamic component that displays a list of contents for a specific resource,
+ * handling data fetching, loading states, and error display.
+ */
 
 "use client";
 
@@ -25,6 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 
+// Dynamically import content list components for each resource type using lazy loading.
 const ListBook = lazy(() => import("@/components/resource/book/ListBook"));
 const ListDocument = lazy(
   () => import("@/components/resource/document/ListDocument")
@@ -34,6 +43,10 @@ const ListDefault = lazy(
 );
 const ListMusic = lazy(() => import("@/components/resource/music/ListMusic"));
 
+/**
+ * A map to associate resource types with their corresponding list components.
+ * This allows for dynamic component rendering based on the URL parameters.
+ */
 const contentListMap: Record<
   string,
   React.ComponentType<ContentListComponentProps<any>>
@@ -45,6 +58,15 @@ const contentListMap: Record<
   videos: ListDefault,
 };
 
+/**
+ * A client-side component for displaying a list of contents within a resource.
+ *
+ * This component fetches a resource and its thumbnail, and then dynamically renders
+ * the appropriate list component based on the resource type. It manages data fetching
+ * states, including loading and error handling, and records the resource access.
+ *
+ * @returns {JSX.Element} A React component that displays the content list.
+ */
 export default function ContentList() {
   const params = useParams();
   const resourceType = params.resourceType as RESOURCE_TYPE;
@@ -52,14 +74,17 @@ export default function ContentList() {
 
   const { authToken, enableCache } = useFetcherParams();
 
+  // Select the appropriate list component based on the resource type.
   const ContentListComponent = contentListMap[resourceType];
   const isContentListComponentAvailable = !!ContentListComponent;
 
+  // Memoize the fetcher instance to prevent unnecessary re-creations.
   const fetcher = useMemo(
     () => createFetcher(resourceType, enableCache, authToken),
     [resourceType, enableCache, authToken]
   );
 
+  // Use react-query to manage data fetching and caching for the resource.
   const {
     data: resourceData,
     isLoading: isLoadingResource,
@@ -74,15 +99,17 @@ export default function ContentList() {
       !!resourceType &&
       !!resourceId &&
       isContentListComponentAvailable,
-    gcTime: 1000 * 60 * 10, // 10分間キャッシュ保持
-    staleTime: 1000 * 60 * 5, // 5分間は stale と見なさない
+    gcTime: 1000 * 60 * 10, // Cache for 10 minutes
+    staleTime: 1000 * 60 * 5, // Data is not considered stale for 5 minutes
   });
 
+  // Memoize the list of contents to avoid re-calculation.
   const contents = useMemo(() => {
     if (!resourceData) return null;
     return resourceData.basicMeta.contents || null;
   }, [resourceData]);
 
+  // Use react-query to fetch the thumbnail blob.
   const {
     data: thumbnailBlob,
     isLoading: isLoadingThumbnail,
@@ -94,17 +121,18 @@ export default function ContentList() {
       fetchThumbnailBlob(resourceType, resourceId, authToken as string),
     enabled: !!fetcher && !!resourceId,
     staleTime: Infinity,
-    gcTime: 1000 * 60 * 60 * 24, // 24時間キャッシュ保持
+    gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours
   });
 
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
 
+  // Create and revoke a URL for the thumbnail blob.
   useEffect(() => {
     if (thumbnailBlob) {
       const url = URL.createObjectURL(thumbnailBlob);
       setThumbnailUrl(url);
 
-      // クリーンアップ関数で以前の URL を解放
+      // Cleanup function to release the previous URL.
       return () => {
         URL.revokeObjectURL(url);
       };
@@ -113,17 +141,20 @@ export default function ContentList() {
     }
   }, [thumbnailBlob]);
 
+  // Determine if the access should be recorded.
   const shouldRecordAccess = useMemo(
     () => contents && contents.length > 0,
     [contents]
   );
 
+  // Record the resource access when the content list becomes available.
   useEffect(() => {
     if (shouldRecordAccess) {
       recordAccess(resourceType, resourceId);
     }
   }, [shouldRecordAccess, resourceType, resourceId]);
 
+  // Determine the error message to display based on various conditions.
   const displayError = useMemo(() => {
     if (!isContentListComponentAvailable) {
       return `⚠ No list component available for resource type: ${resourceType}.`;
@@ -147,6 +178,7 @@ export default function ContentList() {
     thumbnailError,
   ]);
 
+  // A combined loading state for a smoother user experience.
   const isLoadingCombined =
     isLoadingResource || isLoadingThumbnail || (resourceData && !contents);
 

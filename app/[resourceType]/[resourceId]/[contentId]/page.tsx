@@ -1,8 +1,16 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module ViewContent
+ * @description
+ * This module dynamically renders a viewer component for a specific resource content,
+ * handling data fetching, loading states, and error display.
+ */
 
 "use client";
 
@@ -25,6 +33,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { lazy, Suspense, useEffect, useMemo } from "react";
 
+// Dynamically import viewer components for each resource type using lazy loading.
 const ViewBook = lazy(() => import("@/components/resource/book/ViewBook"));
 const ViewDocument = lazy(
   () => import("@/components/resource/document/ViewDocument")
@@ -33,6 +42,10 @@ const ViewImage = lazy(() => import("@/components/resource/image/ViewImage"));
 const PlayMusic = lazy(() => import("@/components/resource/music/PlayMusic"));
 const PlayVideo = lazy(() => import("@/components/resource/video/PlayVideo"));
 
+/**
+ * A map to associate resource types with their corresponding React components.
+ * This allows for dynamic component rendering based on the URL parameters.
+ */
 const resourceViewMap: Record<
   string,
   React.ComponentType<ViewComponentProps<any>>
@@ -44,6 +57,16 @@ const resourceViewMap: Record<
   videos: PlayVideo,
 };
 
+/**
+ * A client-side component for viewing specific resource content.
+ *
+ * This component fetches a resource by its ID and a specific content item within it.
+ * It handles various states including loading, errors, and missing content.
+ * It also dynamically renders the appropriate viewer component (e.g., for images,
+ * videos, or books) and records the content access for analytics.
+ *
+ * @returns {JSX.Element} A React component for viewing content.
+ */
 export default function ViewContent() {
   const params = useParams();
   const resourceType = params.resourceType as RESOURCE_TYPE;
@@ -52,14 +75,17 @@ export default function ViewContent() {
   const contentId = Number(strContentId);
   const { authToken } = useFetcherParams();
 
+  // Select the appropriate viewer component based on the resource type.
   const ViewComponent = resourceViewMap[resourceType];
   const isViewComponentAvailable = !!ViewComponent;
 
+  // Memoize the fetcher instance to prevent unnecessary re-creations.
   const fetcher = useMemo(
     () => createFetcher(resourceType, false, authToken),
     [resourceType, authToken]
   );
 
+  // Use react-query to manage data fetching and caching for the resource.
   const {
     data: resourceData,
     isLoading: isLoadingResource,
@@ -75,6 +101,7 @@ export default function ViewContent() {
     staleTime: 1000 * 60 * 5,
   });
 
+  // Memoize the specific content metadata to avoid re-calculating it.
   const contentMeta = useMemo(() => {
     if (!resourceData) return null;
     return (
@@ -83,14 +110,17 @@ export default function ViewContent() {
     );
   }, [resourceData, contentId]);
 
+  // Determine if the access should be recorded based on whether the content metadata is available.
   const shouldRecordAccess = useMemo(() => !!contentMeta, [contentMeta]);
 
+  // Record the content access when the content metadata becomes available.
   useEffect(() => {
     if (shouldRecordAccess) {
       recordAccess(resourceType, resourceId, contentId);
     }
   }, [shouldRecordAccess, resourceType, resourceId, contentId]);
 
+  // Determine the error message to display based on various conditions.
   const displayError = useMemo(() => {
     if (!isViewComponentAvailable) {
       return `⚠ Viewer unavailable for resource type: ${resourceType}.`;
@@ -116,6 +146,7 @@ export default function ViewContent() {
     resourceId,
   ]);
 
+  // A combined loading state for a smoother user experience.
   const isLoadingCombined =
     isLoadingResource || (!contentMeta && !displayError);
 

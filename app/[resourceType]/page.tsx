@@ -1,8 +1,15 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module UnifiedResourceView
+ * @description
+ * This module provides a dynamic component that renders a specific view based on the user's selected view mode.
+ */
 
 "use client";
 
@@ -13,6 +20,15 @@ import TrajectoryView from "@/components/trajectory/TrajectoryView";
 import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import { ViewMode } from "@/types/client/view_preferences";
 
+/**
+ * A client-side component that dynamically renders a different view based on the current global settings.
+ *
+ * This component uses the `useGlobalSettings` hook to determine the user's preferred `ViewMode`
+ * (Grid, Slide, Map, or Trajectory) and renders the corresponding component.
+ * It serves as a central view switcher for the application's main content area.
+ *
+ * @returns {JSX.Element} A React component for the currently selected view mode.
+ */
 export default function UnifiedResourceView() {
   console.debug("UnifiedResourceView");
   const { settings } = useGlobalSettings();
