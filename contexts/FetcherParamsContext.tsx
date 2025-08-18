@@ -9,46 +9,57 @@
 
 "use client";
 
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, JSX, useContext, useMemo } from "react";
 
 /**
- * FetcherParamsContext で提供される値の型定義
+ * Type definition for the values provided by FetcherParamsContext.
+ *
+ * This context supplies authentication tokens and cache control flags
+ * to components that perform data fetching.
  */
 interface FetcherParams {
+  /** Access token used for authenticated API requests */
   accessToken: string | null | undefined;
+
+  /** Auth token (e.g., ID token) used for server-side verification */
   authToken: string | null | undefined;
+
+  /** Flag indicating whether caching is enabled for fetch operations */
   enableCache: boolean;
 }
 
 /**
- * FetcherParamsContext の作成
- * デフォルト値は undefined で、プロバイダ内で実際の値が提供される
+ * React context for providing fetcher parameters such as tokens and cache settings.
+ *
+ * The default value is `undefined`, and must be explicitly provided via the context provider.
  */
 const FetcherParamsContext = createContext<FetcherParams | undefined>(
   undefined
 );
 
 /**
- * FetcherParamsProvider コンポーネント
- * アプリケーションのサブツリーに accessToken と authToken, enableCache を提供する
+ * Provider component for FetcherParamsContext.
  *
- * @param {Object} props - children および accessToken, authToken, enableCache
- * @param {React.ReactNode} props.children - 子コンポーネント
- * @param {string | null | undefined} props.accessToken - 認証トークン
- * @param {string | null | undefined} props.authToken - 認証トークン（サーバーに合わせて accessToken, idToken を入れる）
- * @param {boolean} props.enableCache - キャッシュの有効/無効設定
- * @returns {JSX.Element} プロバイダでラップされた子コンポーネント
+ * Wraps a subtree of the application and supplies accessToken, authToken,
+ * and enableCache values to descendant components.
+ *
+ * @param props - Props containing children and fetcher parameters.
+ * @param props.children - React children to be wrapped by the provider.
+ * @param props.accessToken - Access token for API authentication.
+ * @param props.authToken - Auth token (e.g., ID token) for server-side validation.
+ * @param props.enableCache - Boolean flag to enable or disable caching.
+ * @returns A JSX element wrapping children with FetcherParamsContext.
  */
 export const FetcherParamsProvider = ({
   children,
   accessToken,
   authToken,
   enableCache,
-}: React.PropsWithChildren<FetcherParams>) => {
+}: React.PropsWithChildren<FetcherParams>): JSX.Element => {
   const value = useMemo(
     () => ({
-      accessToken: accessToken,
-      authToken: authToken,
+      accessToken,
+      authToken,
       enableCache,
     }),
     [accessToken, authToken, enableCache]
@@ -62,13 +73,15 @@ export const FetcherParamsProvider = ({
 };
 
 /**
- * useFetcherParams カスタムフック
- * FetcherParamsContext から accessToken と enableCache を取得するためのフック
- * プロバイダの外部で呼び出された場合はエラーをスロー
+ * Custom hook to access fetcher parameters from FetcherParamsContext.
  *
- * @returns {FetcherParams} accessToken と authToken, enableCache を含むオブジェクト
+ * This hook retrieves accessToken, authToken, and enableCache values.
+ * If used outside of a FetcherParamsProvider, it throws an error.
+ *
+ * @returns An object containing accessToken, authToken, and enableCache.
+ * @throws Error if called outside of a FetcherParamsProvider.
  */
-export const useFetcherParams = () => {
+export const useFetcherParams = (): FetcherParams => {
   const context = useContext(FetcherParamsContext);
   if (context === undefined) {
     throw new Error(

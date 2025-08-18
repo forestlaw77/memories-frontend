@@ -5,7 +5,6 @@
  * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
  * - Commercial use requires a separate commercial license (contact author)
  * You may not use this software for commercial purposes under the MIT License.
- *
  */
 
 import { ReactNode, createContext, useContext, useReducer } from "react";

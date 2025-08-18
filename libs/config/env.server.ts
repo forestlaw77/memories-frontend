@@ -14,7 +14,10 @@ import { z } from "zod";
 dotenv.config();
 
 const envSchema = z.object({
-  SKIP_AUTH: z.string(),
+  /**
+   * If set to "true", disables authentication (useful for local development).
+   */
+  SKIP_AUTH: z.string().default("false"),
   NEXTAUTH_URL: z.string().url(),
   NEXTAUTH_SECRET: z.string().min(32),
   GOOGLE_CLIENT_ID: z.string().min(1),
