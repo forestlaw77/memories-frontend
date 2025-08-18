@@ -5,9 +5,12 @@
  * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
  * - Commercial use requires a separate commercial license (contact author)
  * You may not use this software for commercial purposes under the MIT License.
+ *
+ * @module auth
+ * Authentication configuration and API route handler using NextAuth.
  */
 
-import { MAX_AGE } from "@/config/settings";
+import { SESSION_MAX_AGE_SEC, SESSION_UPDATE_AGE_SEC } from "@/config/time";
 import { env } from "@/libs/config/env.server";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
@@ -44,8 +47,8 @@ export const authOptions: NextAuthOptions = {
   secret: env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
-    maxAge: MAX_AGE,
-    updateAge: 5 * 60,
+    maxAge: SESSION_MAX_AGE_SEC,
+    updateAge: SESSION_UPDATE_AGE_SEC,
   },
   callbacks,
 };

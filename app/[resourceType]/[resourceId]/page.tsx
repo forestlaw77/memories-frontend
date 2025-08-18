@@ -17,6 +17,7 @@
 import DynamicBreadcrumb from "@/components/common/DynamicBreadcrumb";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import ErrorMessage from "@/components/common/ErrorMessage";
+import { GC_TIME_STANDARD, STALE_TIME_SHORT } from "@/config/time";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import { createFetcher } from "@/libs/api/resource_fetcher";
 import { fetchResourceById, fetchThumbnailBlob } from "@/libs/api/resources";
@@ -99,8 +100,8 @@ export default function ContentList() {
       !!resourceType &&
       !!resourceId &&
       isContentListComponentAvailable,
-    gcTime: 1000 * 60 * 10, // Cache for 10 minutes
-    staleTime: 1000 * 60 * 5, // Data is not considered stale for 5 minutes
+    gcTime: GC_TIME_STANDARD,
+    staleTime: STALE_TIME_SHORT,
   });
 
   // Memoize the list of contents to avoid re-calculation.
@@ -121,7 +122,7 @@ export default function ContentList() {
       fetchThumbnailBlob(resourceType, resourceId, authToken as string),
     enabled: !!fetcher && !!resourceId,
     staleTime: Infinity,
-    gcTime: 1000 * 60 * 60 * 24, // Cache for 24 hours
+    gcTime: GC_TIME_STANDARD,
   });
 
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);

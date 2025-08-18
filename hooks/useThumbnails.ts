@@ -1,9 +1,13 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ */
 
+import { GC_TIME_STANDARD } from "@/config/time";
 import { Fetcher } from "@/libs/api/resource_fetcher";
 import {
   ImageContentMeta,
@@ -40,7 +44,7 @@ export function useThumbnailQuery(resourceId: string, fetcher: Fetcher) {
       fetchThumbnailAndCreateUrl(fetcher, resourceId, signal),
     enabled: !!fetcher && !!resourceId,
     staleTime: Infinity, // サムネイルは頻繁に変わらないため、無期限にキャッシュ
-    gcTime: 1000 * 60 * 5, // 5分間はガーベジコレクションの対象とする
+    gcTime: GC_TIME_STANDARD,
     meta: {
       resourceId: resourceId,
       type: "image-thumbnail",
@@ -105,8 +109,7 @@ export function useThumbnails(
           fetchThumbnailAndCreateUrl(fetcher, resourceId, signal),
         enabled: !!fetcher && !!resourceId,
         staleTime: Infinity, // サムネイルは頻繁に変わらないため、無期限にキャッシュ
-        cacheTime: 1000 * 60 * 5, // 5分間はキャッシュを保持
-        gcTime: 1000 * 60 * 5, // 5分間はガーベジコレクションの対象とする
+        gcTime: GC_TIME_STANDARD,
         meta: {
           resourceId: resourceId,
           type: "image-thumbnail",

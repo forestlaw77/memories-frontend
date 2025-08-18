@@ -1,14 +1,18 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// This software is licensed for:
-//   - Non-commercial use under the MIT License (see LICENSE-NC.txt)
-//   - Commercial use requires a separate commercial license (contact author)
-// You may not use this software for commercial purposes under the MIT License.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is licensed for:
+ * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
+ * - Commercial use requires a separate commercial license (contact author)
+ * You may not use this software for commercial purposes under the MIT License.
+ */
 
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { GC_TIME_STANDARD, STALE_TIME_SHORT } from "@/config/time";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import { createFetcher } from "@/libs/api/resource_fetcher";
@@ -82,8 +86,8 @@ export function useResourceView<
     queryFn: () =>
       fetchAllResources<TContent, TDetail>(resourceType, authToken!),
     enabled: !!authToken && !!resourceType,
-    staleTime: 300_000, // 5 min
-    gcTime: 3_600_000, // 1 hour
+    staleTime: STALE_TIME_SHORT,
+    gcTime: GC_TIME_STANDARD,
   });
 
   /**

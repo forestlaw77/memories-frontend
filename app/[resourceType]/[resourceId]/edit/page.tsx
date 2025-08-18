@@ -18,6 +18,7 @@ import DynamicBreadcrumb from "@/components/common/DynamicBreadcrumb";
 import { toaster } from "@/components/common/toaster";
 import EditThumbnail from "@/components/EditThumbnail";
 import { ResourceEditPanel } from "@/components/form/ResourceEditPanel";
+import { GC_TIME_STANDARD, STALE_TIME_SHORT } from "@/config/time";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import useEditHandleSubmit from "@/hooks/useEditHandleSubmit";
 import useGenerateQueryParams from "@/hooks/useGenerateQueryParams";
@@ -70,8 +71,8 @@ export default function EditResource() {
     queryFn: async () =>
       fetchResourceById(resourceType, resourceId, authToken as string),
     enabled: !!authToken && !!resourceType && !!resourceId,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 10,
+    staleTime: STALE_TIME_SHORT,
+    gcTime: GC_TIME_STANDARD,
   });
 
   // Use react-query to fetch the thumbnail blob
@@ -88,7 +89,7 @@ export default function EditResource() {
     },
     enabled: !!fetcher && !!resourceId,
     staleTime: Infinity,
-    gcTime: 1000 * 60 * 5,
+    gcTime: GC_TIME_STANDARD,
   });
 
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);

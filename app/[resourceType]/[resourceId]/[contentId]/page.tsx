@@ -17,6 +17,7 @@
 import DynamicBreadcrumb from "@/components/common/DynamicBreadcrumb";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
 import ErrorMessage from "@/components/common/ErrorMessage";
+import { GC_TIME_STANDARD, STALE_TIME_SHORT } from "@/config/time";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import { createFetcher } from "@/libs/api/resource_fetcher";
 import { fetchResourceById } from "@/libs/api/resources";
@@ -57,6 +58,8 @@ const resourceViewMap: Record<
   videos: PlayVideo,
 };
 
+export type ViewContentProps = {};
+
 /**
  * A client-side component for viewing specific resource content.
  *
@@ -67,7 +70,7 @@ const resourceViewMap: Record<
  *
  * @returns {JSX.Element} A React component for viewing content.
  */
-export default function ViewContent() {
+export default function ViewContent(props: ViewContentProps) {
   const params = useParams();
   const resourceType = params.resourceType as RESOURCE_TYPE;
   const resourceId = params.resourceId as string;
@@ -97,8 +100,8 @@ export default function ViewContent() {
       fetchResourceById(resourceType, resourceId, authToken as string),
     enabled:
       !!authToken && !!resourceType && !!resourceId && isViewComponentAvailable,
-    gcTime: 1000 * 60 * 10,
-    staleTime: 1000 * 60 * 5,
+    gcTime: GC_TIME_STANDARD,
+    staleTime: STALE_TIME_SHORT,
   });
 
   // Memoize the specific content metadata to avoid re-calculating it.
