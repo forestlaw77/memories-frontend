@@ -19,6 +19,7 @@ import {
   Input,
   Spinner,
   Stack,
+  Switch,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { FieldInputs } from "./FieldInputs";
@@ -31,6 +32,8 @@ interface GenericFormProps {
   handleSubmit: (
     data: Record<string, string>,
     files: File[] | null,
+    filePaths: string[] | null,
+    options: { shouldStoreFile: boolean },
     setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>,
     setCompletedCount: React.Dispatch<React.SetStateAction<number>>
   ) => void;
@@ -47,6 +50,7 @@ export function AddGenericForm({
 }: GenericFormProps) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<File[] | null>(null);
+  const [filePaths, setFilePaths] = useState<string[] | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
   const [isFormEmpty, setIsFormEmpty] = useState(true);
@@ -58,6 +62,7 @@ export function AddGenericForm({
   );
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [shouldStoreFile, setShouldStoreFile] = useState(true);
 
   async function handleSearchClick() {
     try {
@@ -120,14 +125,23 @@ export function AddGenericForm({
     const selectedFiles = event.target.files
       ? Array.from(event.target.files)
       : null;
+    const filePaths = selectedFiles?.map((file) => file.name); // file.webkitRelativePath
     setFiles(selectedFiles);
+    setFilePaths(filePaths ?? null);
     setIsFileEmpty(selectedFiles ? false : true);
   }
 
   async function handleFormSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
 
-    handleSubmit(formData, files, setIsSubmitting, setCompletedCount);
+    handleSubmit(
+      formData,
+      files,
+      filePaths,
+      { shouldStoreFile },
+      setIsSubmitting,
+      setCompletedCount
+    );
   }
 
   useEffect(() => {
@@ -182,6 +196,18 @@ export function AddGenericForm({
               onScanSuccess: handleScanSuccess,
             }}
           />
+          <Field.Root orientation="horizontal">
+            <Field.Label>STORE FILE?</Field.Label>
+            <Switch.Root
+              checked={shouldStoreFile}
+              onCheckedChange={(e) => setShouldStoreFile(e.checked)}
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+            </Switch.Root>
+          </Field.Root>
           <Field.Root orientation="horizontal">
             <Field.Label>FILE</Field.Label>
             <Input type="file" multiple onChange={handleFileChange} />

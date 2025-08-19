@@ -39,6 +39,8 @@ export default function useAddHandleSubmit(
   return async function handleSubmit(
     data: object,
     files: File[] | null,
+    filePaths: string[] | null,
+    options: { shouldStoreFile: boolean },
     setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>,
     setCompletedCount: React.Dispatch<React.SetStateAction<number>>
   ) {
@@ -54,15 +56,28 @@ export default function useAddHandleSubmit(
         );
       }
       if (files && files.length > 0) formData.append("content-file", files[0]);
+      if (filePaths && filePaths.length > 0)
+        formData.append("file-path", filePaths[0]);
+      if (options.shouldStoreFile)
+        formData.append("stored", options.shouldStoreFile ? "true" : "false");
 
       const response = await fetcher.addResource(formData);
       const resource_id = response.resource_id;
       setCompletedCount(1);
 
       if (files && files.length > 1) {
-        const promises = files.slice(1).map(async (file) => {
+        const promises = files.slice(1).map(async (file, index) => {
           const formData = new FormData();
           formData.append("content-file", file);
+          if (filePaths && filePaths.length > index + 1) {
+            formData.append("file-path", filePaths[index + 1]);
+          }
+          if (options.shouldStoreFile)
+            formData.append(
+              "stored",
+              options.shouldStoreFile ? "true" : "false"
+            );
+
           const result = await fetcher.addResourceContent(
             resource_id,
             formData

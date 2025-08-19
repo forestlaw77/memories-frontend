@@ -95,6 +95,8 @@ export class ResourceAdapter {
               updatedAt: content.updated_at
                 ? new Date(content.updated_at)
                 : undefined,
+              filePath: content.file_path,
+              stored: content.stored,
             } as TContentMeta)
         ) || [],
       childResourceIds: serverResource.basic_meta?.child_resource_ids || [],

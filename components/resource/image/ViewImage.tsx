@@ -11,6 +11,7 @@
 
 import { toaster } from "@/components/common/toaster";
 import GeoMap from "@/components/map/GeoMap";
+import { GC_TIME_STANDARD, STALE_TIME_SHORT } from "@/config/time";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import { RESPONSE_TYPE } from "@/libs/api/resource_api";
 import { createFetcher } from "@/libs/api/resource_fetcher";
@@ -83,9 +84,12 @@ export default function ViewImage({
       }
       return URL.createObjectURL(imageBlob);
     },
-    enabled: !!fetcher && !!resourceId && !!contentId,
-    staleTime: 5 * 60 * 1000,
+    enabled: !!fetcher && !!resourceId && !!contentId, //&& !!contentMeta.stored,
+    staleTime: STALE_TIME_SHORT,
+    gcTime: GC_TIME_STANDARD,
   });
+
+  const effectiveUrl = contentMeta?.stored ? imageUrl : contentMeta?.filePath;
 
   useEffect(() => {
     if (isError && error) {
@@ -163,7 +167,7 @@ export default function ViewImage({
           <ChakraImage
             maxWidth="1024px"
             maxHeight="768px"
-            src={imageUrl as string}
+            src={effectiveUrl as string}
             alt="Image Preview"
             fit="contain"
           />
@@ -222,7 +226,7 @@ export default function ViewImage({
           </Box>
           <Card.Footer>
             <a
-              href={imageUrl as string}
+              href={effectiveUrl as string}
               download={`image-${contentMeta?.filename || "Photo Download"}`}
             >
               Download

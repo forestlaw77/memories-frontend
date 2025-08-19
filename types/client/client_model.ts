@@ -77,6 +77,8 @@ export interface BaseContentMeta {
   size: number | null; // サイズ
   createdAt: Date | null; // 登録日時
   updatedAt: Date | null; // 更新日時
+  filePath?: string | null;
+  stored: boolean;
 }
 
 export interface MusicContentMeta extends BaseContentMeta {

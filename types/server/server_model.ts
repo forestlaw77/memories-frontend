@@ -22,6 +22,8 @@ export interface ServerContentMeta {
       address: Record<string, string | null>; // Address components of the location
     }; // Geolocation information
   };
+  file_path?: string | null;
+  stored: boolean;
 }
 
 export interface ServerBasicMeta {

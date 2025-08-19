@@ -32,7 +32,10 @@ export function applyAddressFields(
         ? "Unknown"
         : resolveCountryCode(locationInfo.address["country"]) ||
           locationInfo.address["country"];
-  } else if (detailMeta.country.length > 2) {
+  } else if (
+    typeof detailMeta.country === "string" &&
+    detailMeta.country.length > 2
+  ) {
     detailMeta.country =
       resolveCountryCode(detailMeta["country"]) || detailMeta.country;
   }

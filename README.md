@@ -190,13 +190,14 @@ docker run -e NEXTAUTH_SECRET=your-secret -e BACKEND_API_URL=https://api.example
 | Layer            | Technology                  | Purpose                                      |
 | ---------------- | --------------------------- | -------------------------------------------- |
 | Framework        | Next.js                     | App routing, SSR/SSG, deployment flexibility |
-| UI Library       | Chakra UI                   | Accessible, theme-aware component styling    |
+| UI Library       | Chakra UI V3                | Accessible, theme-aware component styling    |
 | Map Engine       | Leaflet                     | Lightweight interactive maps                 |
 | Slideshow        | Swiper                      | Responsive, touch-friendly carousel viewer   |
 | State Management | Zustand                     | Scalable local/global state                  |
 | Data Fetching    | TanStack Query              | Async caching, background updates            |
 | Styling          | CSS Modules + Chakra tokens | Scoped styles and design consistency         |
 | Icons            | React Icons                 | Visual cues and UI clarity                   |
+| Document         | TypeDoc + Storybook         | Documentation                                |
 
 ## 🧪 Development Philosophy
 
