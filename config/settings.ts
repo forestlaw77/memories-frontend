@@ -1,3 +1,9 @@
-export const STORAGE_API_URL =
-  process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:4001/v1";
-export const MAX_AGE = 30 * 60; // 1800 sec = 30 min
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
+ * You may not use this software for commercial purposes under the MIT License.
+ */

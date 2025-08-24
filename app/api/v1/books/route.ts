@@ -1,5 +1,23 @@
-// Copyright (c) 2025 Tsutomu FUNADA
-// Licensed under the MIT License. See LICENSE file in the project root for full license information.
+/**
+ * @copyright Copyright (c) 2025 Tsutomu FUNADA
+ * @license
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
+ * You may not use this software for commercial purposes under the MIT License.
+ * @module books
+ * @description
+ * This module provides an API route to fetch and unify book data from
+ * multiple sources, including Rakuten Books API and Google Books API.
+ * It aggregates book information based on query parameters like title,
+ * author, and ISBN, returning a consolidated list of books.
+ * Environment Variables:
+ * - RAKUTEN_APP_ID: Your Rakuten application ID for accessing the Rakuten Books API.
+ * - GOOGLE_BOOKS_API_KEY: Your API key for accessing the Google Books API.
+ * Example Request:
+ * GET /api/v1/books?title=example&author=authorName&isbn=1234567890
+ */
 
 import { NextResponse } from "next/server";
 

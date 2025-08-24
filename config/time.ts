@@ -1,9 +1,10 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  */
 
@@ -27,6 +28,9 @@ export const SESSION_MAX_AGE_SEC = 30 * 60; // 1800 sec = 30 min
 
 /** Session expiration time in milliseconds (for internal use) */
 export const SESSION_MAX_AGE_MS = SESSION_MAX_AGE_SEC * SECOND_MS;
+
+/** Session expiration time in minutes (for internal use) */
+export const SESSION_MAX_AGE_MIN = SESSION_MAX_AGE_SEC / 60; // in minutes
 
 /** Session update time in seconds (used by NextAuth `session.updateAge`) */
 export const SESSION_UPDATE_AGE_SEC = 5 * 60; // 300 sec = 5 min

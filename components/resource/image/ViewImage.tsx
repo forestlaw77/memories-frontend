@@ -1,9 +1,10 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  */
 
@@ -14,7 +15,8 @@ import GeoMap from "@/components/map/GeoMap";
 import { GC_TIME_STANDARD, STALE_TIME_SHORT } from "@/config/time";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import { RESPONSE_TYPE } from "@/libs/api/resource_api";
-import { createFetcher } from "@/libs/api/resource_fetcher";
+import { createFetcher } from "@/services/api/createFetcher";
+//import { createFetcher } from "@/libs/api/resource_fetcher";
 import {
   ImageContentMeta,
   RESOURCE_TYPE,

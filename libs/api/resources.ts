@@ -7,11 +7,12 @@
  * You may not use this software for commercial purposes under the MIT License.
  */
 
-import { STORAGE_API_URL } from "@/config/settings";
-import {
-  createFetcher,
-  ResourceFetcherError,
-} from "@/libs/api/resource_fetcher";
+//import { STORAGE_API_URL } from "@/config/settings";
+import { createFetcher } from "@/services/api/createFetcher";
+// import {
+//   createFetcher,
+//   ResourceFetcherError,
+// } from "@/libs/api/resource_fetcher";
 import {
   BaseContentMeta,
   BaseDetailMeta,
@@ -19,7 +20,9 @@ import {
   ResourceMeta,
 } from "@/types/client/client_model";
 import { UserMeta } from "@/types/user/user_types"; // UserMeta の型をインポート
+import { ResourceFetcherError } from "@/utils/ResourceFetcherError";
 import { signOut } from "next-auth/react";
+import { clientEnv } from "../config/env.client";
 
 export async function fetchResourcesSummary(
   resourceType: RESOURCE_TYPE,
@@ -137,12 +140,15 @@ export async function fetchUserMeta(
 ): Promise<UserMeta | null> {
   // 既存の fetchUserMeta ロジックをそのままコピー
   try {
-    const response = await fetch(`${STORAGE_API_URL}/users/meta`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-      },
-    });
+    const response = await fetch(
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/users/meta`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+        },
+      }
+    );
     if (!response.ok) {
       throw new Error(`Failed to fetch user meta: ${response.statusText}`);
     }

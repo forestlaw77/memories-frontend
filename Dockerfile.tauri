@@ -1,0 +1,80 @@
+# Stage 1: Builder
+FROM node:20-bullseye AS builder
+
+# ビルド引数として UID, GID, USERNAME を受け取る
+ARG UID=1000
+ARG GID=1000
+ARG USERNAME=devuser
+
+# Rust & Tauri CLI の環境構築
+ENV CARGO_HOME="/cargo"
+ENV PATH="${CARGO_HOME}/bin:$PATH"
+
+# pnpm の環境構築
+ENV PNPM_HOME="/pnpm"
+ENV PATH="${PNPM_HOME}:$PATH"
+
+# 必要なパッケージをインストール
+RUN apt-get update && apt-get install -y \
+    curl \
+    libwebkit2gtk-4.0-dev \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    libudev-dev \
+    libx11-dev \
+    libxrandr-dev \
+    libxss-dev libxtst-dev \
+    libxi-dev \
+    libgl1-mesa-dev \
+    libgtk-3-dev \
+    libayatana-appindicator3-dev \
+    libglib2.0-dev \
+    libgdk-pixbuf2.0-dev \
+    libpango1.0-dev \
+    libatk1.0-dev \
+    libcairo2-dev \
+    librsvg2-dev
+
+# devuser を作成し、UID/GID を指定
+RUN addgroup --gid ${GID} ${USERNAME} || true \
+    && adduser --disabled-password --uid ${UID} --gid ${GID} --shell /bin/bash ${USERNAME} || true
+
+RUN mkdir -p ${CARGO_HOME} \
+    && mkdir -p ${PNPM_HOME} \
+    && chown -R ${UID}:${GID} ${CARGO_HOME} \
+    && chown -R ${UID}:${GID} ${PNPM_HOME}
+
+# 作業ディレクトリと所有権
+WORKDIR /src
+RUN chown -R ${UID}:${GID} /src
+
+# pnpm をインストール
+RUN npm install -g pnpm \
+    && mkdir -p ${PNPM_HOME} \
+    && chown -R ${UID}:${GID} ${PNPM_HOME}
+
+# ユーザー切り替え
+USER ${UID}
+
+# Rust をインストール（CARGO_HOME に配置）
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
+    && rustup default stable
+
+
+# 依存キャッシュのため、先に package.json と pnpm-lock.yaml をコピー
+COPY package.json pnpm-lock.yaml ./
+
+# pnpm ストアのキャッシュを活用して依存インストール
+RUN --mount=type=cache,id=pnpm_dev_store,target=${PNPM_HOME}/.pnpm-store \
+    pnpm install --frozen-lockfile \
+    && pnpm config set store-dir ${PNPM_HOME}/.pnpm-store
+
+# ソースコードをコピー
+COPY . .
+
+# Tauri CLI を pnpm 経由でインストール
+RUN pnpm add -g @tauri-apps/cli
+
+# デフォルトコマンド（docker-compose 側で上書き可能）
+CMD ["pnpm", "--dir", "src-tauri", "tauri", "dev"]

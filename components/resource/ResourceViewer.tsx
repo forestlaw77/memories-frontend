@@ -1,15 +1,17 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  */
 
 "use client";
 
-import { createFetcher } from "@/libs/api/resource_fetcher";
+import { createFetcher } from "@/services/api/createFetcher";
+//import { createFetcher } from "@/libs/api/resource_fetcher";
 import { RESOURCE_TYPE } from "@/types/client/client_model";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";

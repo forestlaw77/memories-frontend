@@ -7,7 +7,7 @@
  * You may not use this software for commercial purposes under the MIT License.
  */
 
-import { ResourceFetcher } from "@/libs/api/resource_fetcher";
+import { IResourceFetcher } from "@/services/api/IResourceFetcher";
 
 export enum RESOURCE_TYPE {
   BOOKS = "books",
@@ -167,7 +167,7 @@ export interface ViewComponentProps<T extends BaseContentMeta> {
   contentMeta: T | null;
   resourceId: string;
   contentId: number;
-  fetcher: ResourceFetcher<
+  fetcher: IResourceFetcher<
     RESOURCE_TYPE,
     BaseContentMeta | ImageContentMeta | MusicContentMeta,
     | BookDetailMeta

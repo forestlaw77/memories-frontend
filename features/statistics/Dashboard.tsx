@@ -1,18 +1,19 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  */
 
 import { resourceMenu } from "@/components/layout/MenuTabs";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import ResourcePieChart from "@/features/statistics/ResourcePieChart";
-import { ResourceFetcherError } from "@/libs/api/resource_fetcher";
 import { fetchResourcesSummary } from "@/libs/api/resources";
 import { RESOURCE_TYPE } from "@/types/client/client_model";
+import { ResourceFetcherError } from "@/utils/ResourceFetcherError";
 import {
   Box,
   Text as ChakraText,

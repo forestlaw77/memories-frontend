@@ -46,3 +46,6 @@ next-env.d.ts
 /old_git
 *storybook.log
 storybook-static
+glib-test/*
+*.old
+*.old/*

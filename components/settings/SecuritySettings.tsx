@@ -1,9 +1,10 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  *
  * @module SecuritySettings
@@ -11,7 +12,7 @@
 
 "use client";
 
-import { MAX_AGE } from "@/config/settings";
+import { SESSION_MAX_AGE_MIN } from "@/config/time";
 import { useGlobalSettings } from "@/contexts/GlobalSettingsContext";
 import { Box, Field, Heading, NumberInput } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
@@ -52,7 +53,7 @@ export default function SecuritySettings(props: SecuritySettingsProps) {
           <NumberInput.Root
             value={String(settings.logoutAfterMinutes)}
             min={5}
-            max={MAX_AGE / 60}
+            max={SESSION_MAX_AGE_MIN}
             onValueChange={(e) =>
               updateSetting("logoutAfterMinutes", Number(e.value))
             }

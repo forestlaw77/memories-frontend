@@ -7,10 +7,11 @@
  * You may not use this software for commercial purposes under the MIT License.
  */
 
-import { STORAGE_API_URL } from "@/config/settings";
+//import { STORAGE_API_URL } from "@/config/settings";
 import { ContentApiResponse } from "@/types/api/api_response";
 import { RESOURCE_TYPE } from "@/types/client/client_model";
 import { ServerResourceMeta } from "@/types/server/server_model";
+import { clientEnv } from "../config/env.client";
 
 export enum RESPONSE_TYPE {
   JSON = "json",
@@ -74,7 +75,7 @@ async function fetchResource({
   cache?: RequestCache;
 }): Promise<any | Blob | null> {
   const queryParams = new URLSearchParams(query);
-  let url = `${STORAGE_API_URL}/${resourceType}`;
+  let url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}`;
   url = path ? `${url}/${path}` : url;
   url = queryParams.toString() ? `${url}?${queryParams.toString()}` : url;
   try {
@@ -100,7 +101,7 @@ async function fetchResource({
 }
 
 async function postResource(resourceType: RESOURCE_TYPE, formData: FormData) {
-  const apiUrl = `${STORAGE_API_URL}/${resourceType}?auto-thumbnail=true&auto-exif=true`;
+  const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}?auto-thumbnail=true&auto-exif=true`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -128,10 +129,13 @@ async function putResource(
   formData: FormData
 ) {
   try {
-    const response = await fetch(`${STORAGE_API_URL}/${resourceType}/${id}`, {
-      method: "PUT",
-      body: formData,
-    });
+    const response = await fetch(
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}/${id}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -151,7 +155,7 @@ async function updateResource(
 ) {
   try {
     const response = await fetch(
-      `${STORAGE_API_URL}/${resourceType}/${id}?generate-thumbnail=true`,
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}/${id}?generate-thumbnail=true`,
       {
         method: "PUT",
         body: formData,
@@ -175,10 +179,12 @@ async function postResourceContentAddition(
   id: string,
   formData: FormData
 ) {
-  console.log(`${STORAGE_API_URL}/${resourceType}/${id}/contents`);
+  console.log(
+    `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}/${id}/contents`
+  );
   try {
     const response = await fetch(
-      `${STORAGE_API_URL}/${resourceType}/${id}/contents?auto-exif=true`,
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}/${id}/contents?auto-exif=true`,
       {
         method: "POST",
         body: formData,
@@ -203,10 +209,13 @@ async function patchResource(
   formData: FormData
 ) {
   try {
-    const response = await fetch(`${STORAGE_API_URL}/${resourceType}/${id}`, {
-      method: "PATCH",
-      body: formData,
-    });
+    const response = await fetch(
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${resourceType}/${id}`,
+      {
+        method: "PATCH",
+        body: formData,
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json();

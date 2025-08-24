@@ -7,10 +7,12 @@
  * You may not use this software for commercial purposes under the MIT License.
  */
 
-import { STORAGE_API_URL } from "@/config/settings";
+//import { STORAGE_API_URL } from "@/config/settings";
+import { createFetcher } from "@/services/api/createFetcher";
 import { RESOURCE_TYPE, ResourceMetaMap } from "@/types/client/client_model";
 import { UserMeta } from "@/types/user/user_types";
-import { createFetcher } from "../api/resource_fetcher";
+import { clientEnv } from "../config/env.client";
+//import { createFetcher } from "../api/resource_fetcher";
 
 /**
  * Fetches the user's metadata from the storage API.
@@ -25,12 +27,15 @@ export async function fetchUserMeta(
     if (!sessionToken) {
       console.error("session error");
     }
-    const response = await fetch(`${STORAGE_API_URL}/users/meta`, {
-      method: "GET",
-      headers: {
-        Authorization: sessionToken ? `Bearer ${sessionToken}` : "",
-      },
-    });
+    const response = await fetch(
+      `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/users/meta`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: sessionToken ? `Bearer ${sessionToken}` : "",
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);

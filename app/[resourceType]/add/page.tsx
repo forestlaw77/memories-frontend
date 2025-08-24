@@ -1,9 +1,10 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  *
  * @module AddResource
@@ -44,6 +45,17 @@ export default function AddResource() {
     ? (params.resourceType as RESOURCE_TYPE)
     : null;
 
+  if (!resourceType) {
+    return (
+      <Box p={6}>
+        <DynamicBreadcrumb backLinkOverride={"/"} />
+        <ErrorMessage
+          message={"Invalid resource type provided. Please check the URL."}
+        />
+      </Box>
+    );
+  }
+
   const { authToken } = useFetcherParams();
 
   // Custom hooks for form and search logic
@@ -65,11 +77,7 @@ export default function AddResource() {
   return (
     <Box p={6}>
       <DynamicBreadcrumb backLinkOverride={breadcrumbBackHref} />
-      {!resourceType ? (
-        <ErrorMessage
-          message={"Invalid resource type provided. Please check the URL."}
-        />
-      ) : handleSearch && handleSubmit && generateQueryParams ? (
+      {handleSearch && handleSubmit && generateQueryParams ? (
         <>
           <h1>{resourceType.toUpperCase()} Registration</h1>
           <AddGenericForm

@@ -1,9 +1,10 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  *
  * @module BulkAddResource
@@ -17,7 +18,8 @@
 import DynamicBreadcrumb from "@/components/common/DynamicBreadcrumb";
 import { toaster } from "@/components/common/toaster";
 import { useFetcherParams } from "@/contexts/FetcherParamsContext";
-import { createFetcher } from "@/libs/api/resource_fetcher";
+import { createFetcher } from "@/services/api/createFetcher";
+//import { createFetcher } from "@/libs/api/resource_fetcher";
 import { RESOURCE_TYPE } from "@/types/client/client_model";
 import {
   Box,

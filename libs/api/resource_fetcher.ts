@@ -1,15 +1,25 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  */
 
 //import { STORAGE_API_URL } from "@/config/settings";
 import { ResourceAdapter } from "@/libs/adapters/resourceAdapter";
 import { clientEnv } from "@/libs/config/env.client";
+import {
+  AddResourceContentSuccessResponse,
+  AddResourceSuccessResponse,
+  GetContentSuccessResponse,
+  GetResourcesSuccessResponse,
+  GetResourceSuccessResponse,
+  UpdateResourceSuccessResponse,
+  UpdateThumbnailSuccessResponse,
+} from "@/types/api/api_response";
 import {
   BaseContentMeta,
   BaseDetailMeta,
@@ -24,142 +34,115 @@ import {
   ResourceTypeToMetaMap,
   VideoDetailMeta,
 } from "@/types/client/client_model";
-import {
-  ServerBasicMeta,
-  ServerDetailMeta,
-  ServerResourceMeta,
-} from "@/types/server/server_model";
+import { ServerResourceMeta } from "@/types/server/server_model";
+import { buildQuery, handleApiResponse } from "@/utils/apiUtils";
+import { ResourceFetcherError } from "@/utils/ResourceFetcherError";
 import { RESPONSE_TYPE } from "./resource_api";
 
-export class ResourceFetcherError extends Error {
-  constructor(
-    public resourceType: RESOURCE_TYPE,
-    message: string,
-    public originalError?: unknown
-  ) {
-    super(`[ResourceFetcher] Error (${resourceType}): ${message}`);
-  }
-}
-
-interface GetResourcesSuccessResponse {
-  status: "success";
-  message: string;
-  response_data: {
-    resources: ServerResourceMeta[];
-    total_items: number;
-    page: number | "all";
-    per_page: number | "all";
-  };
-}
-
-interface GetResourceSuccessResponse {
-  status: "success";
-  message: string;
-  resource_id: string;
-  basic_meta: ServerBasicMeta;
-  detail_meta: ServerDetailMeta;
-}
-
-interface GetContentSuccessResponse {
-  status: "success";
-  message: string;
-  resource_id: string;
-  content_id: number;
-  response_data: {
-    content: string;
-    mimetype: string;
-  };
-}
-
-interface AddResourceSuccessResponse {
-  status: "success";
-  message: string;
-  resource_id: string; // 追加されたリソースID (オプション)
-}
-
-interface UpdateResourceSuccessResponse {
-  status: "success"; // 通常、成功時は "success"
-  message: string;
-  resource_id: string; // 更新されたリソースID (オプション)
-}
-
-interface AddResourceContentSuccessResponse {
-  status: "success"; // 通常、成功時は "success"
-  message: string;
-  resource_id: string; // 追加されたリソースID (オプション)
-  content_id: number; // 追加されたコンテンツID (オプション)
-}
-
-interface UpdateThumbnailSuccessResponse {
-  status: "success";
-  message: string;
-  resource_id: string;
-}
+type RuntimeEnv = "tauri" | "web";
 
 export class ResourceFetcher<
   TResourceType extends RESOURCE_TYPE,
   TContentMeta extends BaseContentMeta,
   TDetailMeta extends BaseDetailMeta
 > {
+  private runtimeEnv: RuntimeEnv;
   private enableCache: boolean;
   private authToken: string | null;
 
   constructor(
     public resourceType: TResourceType,
     enableCache: boolean,
-    authToken: string | null
+    authToken: string | null,
+    runtimeEnv: RuntimeEnv = "web" // デフォルトは fetch
   ) {
+    this.runtimeEnv = runtimeEnv;
     this.enableCache = enableCache;
     this.authToken = authToken;
+  }
+
+  // private helper method
+  private buildUrl(
+    path: string,
+    query?: Record<string, string | number | boolean | undefined | null>
+  ): string {
+    const baseUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${path}`;
+    const queryString = query ? buildQuery(query) : "";
+    return `${baseUrl}${queryString ? `?${queryString}` : ""}`;
+  }
+
+  // private helper method
+  private async callApi<T>(
+    method: string,
+    path: string,
+    query?: Record<string, string | number | boolean | undefined | null>,
+    options?: Omit<RequestInit, "method" | "body">,
+    body?: BodyInit | null,
+    errorMessage?: string
+  ): Promise<T> {
+    const url = this.buildUrl(path, query);
+
+    const defaultHeaders: { [key: string]: string } = this.authToken
+      ? { Authorization: `Bearer ${this.authToken}` }
+      : {};
+
+    // JSONボディの場合にのみContent-Typeを設定
+    if (
+      typeof body === "object" &&
+      body !== null &&
+      !(body instanceof FormData)
+    ) {
+      defaultHeaders["Content-Type"] = "application/json";
+      body = JSON.stringify(body);
+    }
+
+    const response = await handleApiResponse(
+      fetch(url, {
+        method,
+        headers: {
+          ...defaultHeaders,
+          ...options?.headers,
+        },
+        ...options,
+        body,
+      }),
+      this.resourceType,
+      errorMessage || `Failed to ${method} resource`
+    );
+
+    return response.json() as Promise<T>;
   }
 
   async getResourcesSummary(): Promise<{
     resourceCount: number;
     contentCount: number;
   }> {
-    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/summary`;
+    const apiResponse: any = await this.callApi(
+      "GET",
+      "summary",
+      undefined, // queryはなし
+      {}, // optionsもなし
+      null, // bodyもなし
+      "Failed to fetch resource summary" // エラーメッセージ
+    );
 
-    try {
-      const response = await handleApiResponse(
-        fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-          },
-        }),
-        this.resourceType,
-        "Failed to fetch resource IDs"
-      );
-
-      const apiResponse: any = await response.json();
-      const { resource_count, content_count } = apiResponse.response_data;
-      return { resourceCount: resource_count, contentCount: content_count };
-    } catch (error) {
-      throw error;
-    }
+    const { resource_count, content_count } = apiResponse.response_data;
+    return { resourceCount: resource_count, contentCount: content_count };
   }
 
   async getResourceIds(): Promise<{ ids: string[] }> {
-    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/ids`;
+    const apiResponse: any = await this.callApi(
+      "GET",
+      "ids",
+      undefined, // クエリパラメータはなし
+      {}, // オプションもなし
+      null, // ボディもなし
+      "Failed to fetch resource IDs" // エラーメッセージ
+    );
 
-    try {
-      const response = await handleApiResponse(
-        fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-          },
-        }),
-        this.resourceType,
-        "Failed to fetch resource IDs"
-      );
-
-      const apiResponse: any = await response.json();
-      const ids: string[] = apiResponse.response_data?.resource_ids;
-      return { ids: ids };
-    } catch (error) {
-      throw error;
-    }
+    // レスポンスからIDの配列を取得
+    const ids: string[] = apiResponse.response_data?.resource_ids;
+    return { ids: ids };
   }
 
   async getResources(
@@ -169,101 +152,70 @@ export class ResourceFetcher<
     resources: ResourceMeta<TContentMeta, TDetailMeta>[];
     total: number;
   }> {
-    const params = new URLSearchParams();
-    if (page !== undefined) params.append("page", page.toString());
-    if (pageSize !== undefined) params.append("per_page", pageSize.toString());
+    const queryParams = { page, per_page: pageSize };
+    const apiResponse = await this.callApi<GetResourcesSuccessResponse>(
+      "GET",
+      "", // リソースタイプ直下のエンドポイントのためパスは空
+      queryParams, // ここでクエリパラメータを渡す
+      {},
+      null,
+      "Failed to fetch resources"
+    );
 
-    const queryString = params.toString();
+    const resource_list: ServerResourceMeta[] =
+      apiResponse.response_data?.resources || [];
+    const totalCount = apiResponse.response_data?.total_items || 0;
 
-    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${
-      this.resourceType
-    }/${queryString ? `?${queryString}` : ""}`;
-
-    try {
-      const response = await handleApiResponse(
-        fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-          },
-        }),
-        this.resourceType,
-        "Failed to fetch resources"
-      );
-
-      const apiResponse: GetResourcesSuccessResponse = await response.json();
-
-      const resource_list: ServerResourceMeta[] =
-        apiResponse.response_data?.resources || [];
-      const totalCount = apiResponse.response_data?.total_items || 0;
-
-      return {
-        resources: resource_list
-          .map((resource) =>
-            ResourceAdapter.fromServerResource<TContentMeta, TDetailMeta>(
-              this.resourceType,
-              resource
-            )
+    return {
+      resources: resource_list
+        .map((resource) =>
+          ResourceAdapter.fromServerResource<TContentMeta, TDetailMeta>(
+            this.resourceType,
+            resource
           )
-          .filter(
-            (r): r is ResourceMeta<TContentMeta, TDetailMeta> => r !== null
-          ),
-        total: totalCount,
-      };
-    } catch (error) {
-      throw error;
-    }
+        )
+        .filter(
+          (r): r is ResourceMeta<TContentMeta, TDetailMeta> => r !== null
+        ),
+      total: totalCount,
+    };
   }
 
   async getResource(
     resourceId: string
   ): Promise<ResourceMeta<TContentMeta, TDetailMeta> | null> {
-    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}`;
-    try {
-      const response = await handleApiResponse(
-        fetch(url, {
-          method: "GET",
-          headers: {
-            Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-          },
-        }),
-        this.resourceType,
-        "Failed to fetch resource"
-      );
+    const apiResponse: GetResourceSuccessResponse = await this.callApi(
+      "GET",
+      resourceId, // パスとして resourceId を渡す
+      undefined, // クエリパラメータはなし
+      {}, // オプションもなし
+      null, // ボディもなし
+      "Failed to fetch resource"
+    );
 
-      const apiResponse: GetResourceSuccessResponse = await response.json();
+    const serverResourceMeta: ServerResourceMeta = {
+      id: apiResponse.resource_id,
+      basic_meta: apiResponse.basic_meta,
+      detail_meta: apiResponse.detail_meta,
+    };
 
-      const serverResourceMeta: ServerResourceMeta = {
-        id: apiResponse.resource_id,
-        basic_meta: apiResponse.basic_meta,
-        detail_meta: apiResponse.detail_meta,
-      };
-      const clientResourceMeta = ResourceAdapter.fromServerResource<
-        TContentMeta,
-        TDetailMeta
-      >(this.resourceType, serverResourceMeta);
-      return clientResourceMeta;
-    } catch (error) {
-      throw error;
-    }
+    const clientResourceMeta = ResourceAdapter.fromServerResource<
+      TContentMeta,
+      TDetailMeta
+    >(this.resourceType, serverResourceMeta);
+
+    return clientResourceMeta;
   }
 
-  async deleteResource(resourceId: string) {
-    const url = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}`;
-    try {
-      const response = await handleApiResponse(
-        fetch(url, {
-          method: "DELETE",
-          headers: {
-            Authorization: this.authToken ? `Bearer ${this.authToken}` : "",
-          },
-        }),
-        this.resourceType,
-        "Failed to deletee resource"
-      );
-    } catch (error) {
-      throw error;
-    }
+  async deleteResource(resourceId: string): Promise<void> {
+    await this.callApi(
+      "DELETE",
+      resourceId, // パスとして resourceId を渡す
+      undefined, // クエリパラメータはなし
+      {}, // オプションもなし
+      null, // ボディもなし
+      "Failed to delete resource"
+    );
   }
 
   async getContent(
@@ -377,107 +329,81 @@ export class ResourceFetcher<
   }
 
   async addResource(formData: FormData): Promise<AddResourceSuccessResponse> {
-    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/?auto-thumbnail=true&auto-exif=true`;
+    const queryParams = { "auto-thumbnail": true, "auto-exif": true };
 
-    const response = await handleApiResponse(
-      fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-        },
-        body: formData,
-      }),
-      this.resourceType,
+    const apiResponse = await this.callApi<AddResourceSuccessResponse>(
+      "POST",
+      "",
+      queryParams,
+      { headers: {} }, // FormDataを使用する場合は、Content-Typeヘッダーを明示的に設定しない
+      formData,
       "Failed to POST Resource"
     );
 
-    return await response.json();
+    return apiResponse;
   }
 
   async updateResource(
     resourceId: string,
     formData: FormData
   ): Promise<UpdateResourceSuccessResponse> {
-    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}`;
-
-    const response = await handleApiResponse(
-      fetch(apiUrl, {
-        method: "PUT",
-        headers: {
-          Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-        },
-        body: formData,
-      }),
-      this.resourceType,
+    const apiResponse = await this.callApi<UpdateResourceSuccessResponse>(
+      "PUT",
+      resourceId,
+      undefined, // クエリパラメータはなし
+      { headers: {} }, // オプションもなし
+      formData,
       "Failed to update resource"
     );
-
-    return await response.json();
+    return apiResponse;
   }
 
   async addResourceContent(
     resourceId: string,
     formData: FormData
   ): Promise<AddResourceContentSuccessResponse> {
-    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/contents?auto-exif=true`;
+    const queryParams = { "auto-exif": true };
 
-    const response = await handleApiResponse(
-      fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-        },
-        body: formData,
-      }),
-      this.resourceType,
+    const apiResponse = await this.callApi<AddResourceContentSuccessResponse>(
+      "POST",
+      `${resourceId}/contents`,
+      queryParams,
+      { headers: {} },
+      formData,
       "Failed to add resource content"
     );
-
-    return await response.json();
+    return apiResponse;
   }
 
   async updateThumbnail(
     resourceId: string,
     angle: number
   ): Promise<UpdateThumbnailSuccessResponse> {
-    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/thumbnail`;
-
-    const response = await handleApiResponse(
-      fetch(apiUrl, {
-        method: "PATCH",
-        headers: {
-          Authorization: this.authToken ? `Bearer ${this.authToken}` : "", // ✅ トークンを利用
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ angle }),
-      }),
-      this.resourceType,
+    const apiResponse = await this.callApi<UpdateThumbnailSuccessResponse>(
+      "PATCH",
+      `${resourceId}/thumbnail`,
+      undefined, // クエリパラメータはなし
+      {}, // オプションはなし
+      JSON.stringify({ angle }), // JSONボディを直接渡す
       "Failed to update thumbnail"
     );
-
-    return await response.json();
+    return apiResponse;
   }
 
   async updateContentExif(
     resourceId: string,
     contentId: number,
     exif_items: Record<string, any>
-  ) {
-    const apiUrl = `${clientEnv.NEXT_PUBLIC_BACKEND_API_URL}/${this.resourceType}/${resourceId}/${contentId}/exif`;
-
-    const response = await handleApiResponse(
-      fetch(apiUrl, {
-        method: "PATCH",
-        headers: {
-          Authorization: this.authToken ? `Bearer ${this.authToken}` : "",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(exif_items),
-      }),
-      this.resourceType,
+  ): Promise<any> {
+    const apiResponse = await this.callApi<any>(
+      "PATCH",
+      `${resourceId}/${contentId}/exif`,
+      undefined, // クエリパラメータはなし
+      {}, // オプションはなし
+      JSON.stringify(exif_items), // JSONボディを直接渡す
       "Failed to update exif"
     );
-    return await response.json();
+    return apiResponse;
   }
 
   getContentURL(
@@ -526,75 +452,6 @@ export function createFetcher<K extends RESOURCE_TYPE>(
     );
   }
   return new ResourceFetcher(type, enableCache, authToken);
-}
-
-export function buildQuery(
-  params: Record<string, string | number | boolean | undefined | null>
-): string {
-  // Converts object to URLSearchParams string, excluding undefined/null
-  return new URLSearchParams(
-    Object.entries(params)
-      .filter(([_, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => [k, String(v)])
-  ).toString();
-}
-
-async function handleApiResponse(
-  responsePromise: Promise<Response>,
-  resourceType: RESOURCE_TYPE,
-  baseMessage: string
-): Promise<Response> {
-  try {
-    const response = await responsePromise;
-
-    if (!response.ok) {
-      let errorDetails: string = response.statusText;
-      try {
-        const errorJson = await response.json();
-        errorDetails = errorJson.message || JSON.stringify(errorJson);
-      } catch (e) {
-        try {
-          errorDetails = await response.text();
-        } catch (textError) {
-          errorDetails = response.statusText;
-        }
-      }
-      const fullMessage = `${baseMessage} (Status: ${response.status}, Details: ${errorDetails})`;
-      if (response.status === 404) {
-        console.log(`[API Error] ${fullMessage}`, {
-          resourceType,
-          status: response.status,
-          details: errorDetails,
-        });
-      } else {
-        console.error(`[API Error] ${fullMessage}`, {
-          resourceType,
-          status: response.status,
-          details: errorDetails,
-        });
-      }
-      throw new ResourceFetcherError(resourceType, fullMessage, {
-        status: response.status,
-        details: errorDetails,
-      });
-    }
-
-    return response; // 成功した Response オブジェクトをそのまま返す
-  } catch (error) {
-    if (error instanceof ResourceFetcherError) {
-      throw error;
-    }
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(
-      `[Network Error] ${baseMessage} for ${resourceType}: ${errorMessage}`,
-      error
-    );
-    throw new ResourceFetcherError(
-      resourceType,
-      `${baseMessage}: Network or unexpected error - ${errorMessage}`,
-      error
-    );
-  }
 }
 
 export async function fetchResourcesByType(

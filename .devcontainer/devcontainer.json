@@ -1,0 +1,25 @@
+{
+  "name": "Tauri Dev Environment",
+  "dockerComposeFile": ["../docker-compose.yml"],
+  "service": "forestlaw-frontend",
+  "workspaceFolder": "/src",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "ms-vscode.live-server",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  // GUIアプリケーションの表示設定
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers/features/desktop-lite:1": {}
+  },
+  "runArgs": ["--net=host"]
+}

@@ -1,25 +1,15 @@
 /**
  * @copyright Copyright (c) 2025 Tsutomu FUNADA
  * @license
- * This software is licensed for:
- * - Non-commercial use under the MIT License (see LICENSE-NC.txt)
- * - Commercial use requires a separate commercial license (contact author)
+ * This software is dual-licensed:
+ * - For non-commercial use: MIT License (see LICENSE-NC.txt)
+ * - For commercial use: Requires a separate commercial license (contact author)
+ *
  * You may not use this software for commercial purposes under the MIT License.
  */
 
 import { toaster } from "@/components/common/toaster";
-import { ResourceFetcher } from "@/libs/api/resource_fetcher";
-import {
-  BaseContentMeta,
-  BookDetailMeta,
-  DocumentDetailMeta,
-  ImageContentMeta,
-  ImageDetailMeta,
-  MusicContentMeta,
-  MusicDetailMeta,
-  RESOURCE_TYPE,
-  VideoDetailMeta,
-} from "@/types/client/client_model";
+import { Fetcher } from "@/services/api/IResourceFetcher";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useBulkDeleteMutation({
@@ -29,15 +19,7 @@ export function useBulkDeleteMutation({
   onSuccess,
 }: {
   resourceType: string;
-  fetcher: ResourceFetcher<
-    RESOURCE_TYPE,
-    BaseContentMeta | ImageContentMeta | MusicContentMeta,
-    | BookDetailMeta
-    | DocumentDetailMeta
-    | ImageDetailMeta
-    | MusicDetailMeta
-    | VideoDetailMeta
-  >;
+  fetcher: Fetcher;
   selectedIds: string[];
   onSuccess?: () => void;
 }) {

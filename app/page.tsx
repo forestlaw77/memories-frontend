@@ -60,6 +60,7 @@ const resourceMenu = [
  * @returns A React component that renders the welcome header, resource navigation cards, and dashboard.
  */
 export default function Home() {
+  console.log("NEXT_PUBLIC_BACKEND_API_URL:", process.env.NEXT_PUBLIC_BACKEND_API_URL);
   return (
     <div>
       <DynamicBreadcrumb />

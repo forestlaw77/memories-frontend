@@ -23,8 +23,9 @@ import { useFetcherParams } from "@/contexts/FetcherParamsContext";
 import useEditHandleSubmit from "@/hooks/useEditHandleSubmit";
 import useGenerateQueryParams from "@/hooks/useGenerateQueryParams";
 import useHandleSearch from "@/hooks/useHandleSearch";
-import { createFetcher } from "@/libs/api/resource_fetcher";
+//import { createFetcher } from "@/libs/api/resource_fetcher";
 import { fetchResourceById } from "@/libs/api/resources";
+import { createFetcher } from "@/services/api/createFetcher";
 import {
   BaseContentMeta,
   BaseDetailMeta,
